@@ -11,13 +11,15 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import ChoiceLabel from "./ChoiceLabel";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 interface Props {
     name: string;
     location: string;
+    breed: string;
     distance: number;
     age: number;
-    image: ImageSourcePropType | string;
+    upload: any;
     isFirst: boolean;
     swipe: Animated.ValueXY;
     titleSign: Animated.Value;
@@ -28,10 +30,11 @@ const { width, height } = Dimensions.get("screen");
 
 const Card: FC<Props> = ({
     name,
-    location,
     distance,
+    location,
+    breed,
     age,
-    image,
+    upload,
     isFirst,
     swipe,
     titleSign,
@@ -57,6 +60,9 @@ const Card: FC<Props> = ({
         outputRange: [1, 0],
         extrapolate: "clamp",
     });
+    
+    const profilImage = upload.filter((upload: { profil: any; }) => upload.profil)
+        .map((upload: { file: { url: any; }; }) => upload.file.url)[0]
 
     const renderChoice = useCallback(() => {
         return (
@@ -91,9 +97,9 @@ const Card: FC<Props> = ({
         <Animated.View style={[styles.container, isFirst && animatedCardStyle]} {...rest}>
             <Image
                 source={{
-                    uri: image as string,
+                    uri: profilImage as string,
                 }}
-                style={styles.image}
+                style={styles.upload}
             />
             <LinearGradient
                 colors={["transparent", "rgba(0,0,0,0.8)"]}
@@ -103,8 +109,15 @@ const Card: FC<Props> = ({
                     <Text style={styles.name}>
                         {name} , {age}
                     </Text>
-                    <Text style={styles.location}>Live in {location}</Text>
-                    <Text style={styles.distance}>{distance} miles away</Text>
+                    <Text style={styles.text}>
+                    <MaterialCommunityIcons name="map-marker" size={15} style={{paddingRight:5}} />
+                        Live in {location}
+                        </Text>            
+                    <Text style={styles.text}>
+                        <MaterialCommunityIcons name="paw" size={15} style={{paddingRight:5}} />
+                        {breed}
+                    </Text>
+                    {/* <Text style={styles.text}>{distance} miles away</Text> */}
                 </View>
             </LinearGradient>
             {isFirst && renderChoice()}
@@ -118,10 +131,11 @@ const styles = StyleSheet.create({
         top: 25,
         zIndex: 99999,
     },
-    image: {
+    upload: {
         width: width * 0.9,
         height: height * 0.68,
         borderRadius: 20,
+        marginTop: height * 0.02
     },
     gradient: {
         position: "absolute",
@@ -142,12 +156,7 @@ const styles = StyleSheet.create({
         color: "white",
         fontWeight: "400",
     },
-    location: {
-        fontSize: 18,
-        color: "white",
-        fontWeight: "300",
-    },
-    distance: {
+    text: {
         fontSize: 18,
         color: "white",
         fontWeight: "300",

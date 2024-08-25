@@ -23,6 +23,7 @@ const SwipeButton: FC<Props> = ({ name, size, color, style, onPress }) => {
 
   return (
     <TouchableWithoutFeedback
+      onPress={onPress}
       onPressIn={() => animateScale(0.6)}
       onPressOut={() => {
         animateScale(1)
@@ -42,7 +43,6 @@ const SwipeButton: FC<Props> = ({ name, size, color, style, onPress }) => {
 
 const styles = StyleSheet.create({
   container: {
-
     width: 60,
     height: 60,
     backgroundColor: 'white',
@@ -50,7 +50,8 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1.2
+    borderWidth: 1.2,
+    marginHorizontal: 15
   },
 });
 

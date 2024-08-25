@@ -51,7 +51,7 @@ export function SessionProvider(props: React.PropsWithChildren) {
   useEffect(() => {
     const loadUser = async () => {
       const storedUser = await AsyncStorage.getItem('user');
-      console.log("Chargement de l'utilisateur depuis AsyncStorage:", storedUser);
+      // console."Chargement de l'utilisateur depuis AsyncStorage:", storedUser);
       if (storedUser) {
         setUser(JSON.parse(storedUser));
       }

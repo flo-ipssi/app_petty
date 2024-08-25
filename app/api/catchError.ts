@@ -1,4 +1,4 @@
-const isFetchError = error => error instanceof TypeError && error.message === "Failed to fetch";
+const isFetchError = (error: { message: string; }) => error instanceof TypeError && error.message === "Failed to fetch";
 
 const catchAsyncError = (error: any): string => {
   let errorMessage = error;

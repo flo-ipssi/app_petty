@@ -65,7 +65,6 @@ const SignUp: FC<Props> = props => {
     values: NewUser,
     actions: FormikHelpers<NewUser>
   ) => {
-      console.log(client + "auth/create");
     actions.setSubmitting(true)
     try {
       
@@ -86,11 +85,9 @@ const SignUp: FC<Props> = props => {
         const resultat = await reponse.json();
         // navigation.navigate('Verification', { userInfo: resultat.user })
       }
-      console.log(reponse);
     } catch (error) {
       // Connexion errors      
       const errorMessage = catchAsyncError(error);
-      console.log(values);
       console.log(error);
       
     }

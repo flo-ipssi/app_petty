@@ -4,7 +4,7 @@ import SwipeButton from './SwipeButton';
 import colors from '@/utils/colors';
 
 interface Props { 
-  handleChoice($p: number) : any
+  handleChoice($p: any) : void
 }
 
 const SwipeButtonsContainer: FC<Props> = ({ handleChoice }) => {
@@ -14,11 +14,14 @@ const SwipeButtonsContainer: FC<Props> = ({ handleChoice }) => {
         name="times"
         size={24}
         color={colors.ERROR} 
-        onPress={() => handleChoice(-1)}
+        onPress={() => {
+          console.log('Pressed times, direction -1');
+          handleChoice(-1);
+        }}
         />
       <SwipeButton
         name="star"
-        size={20}
+        size={24}
         color={colors.SECONDARY}
         // style={{height:40,wight:40,padding:0}} 
         />
@@ -26,7 +29,10 @@ const SwipeButtonsContainer: FC<Props> = ({ handleChoice }) => {
         name="heart"
         size={24}
         color={colors.PRIMARY}
-        onPress={() => handleChoice(1)}
+        onPress={() => {
+          console.log('Pressed heart, direction 1');
+          handleChoice(1);
+        }}
          />
     </View>
   );
