@@ -62,8 +62,24 @@ export default function TabLayout() {
       <Tabs.Screen
         name="setting"
         options={{
+          // headerShown: false,
+          title:'',
           tabBarShowLabel: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="gear" color={color} />,
+          headerRight: () => (
+            <Link href="/modal" asChild>
+              <Pressable>
+                {({ pressed }) => (
+                  <FontAwesome
+                    name="gear"
+                    size={35}
+                    color={Colors[colorScheme ?? "light"].text}
+                    style={{ marginRight: 25, opacity: pressed ? 0.5 : 1 }}
+                  />
+                )}
+              </Pressable>
+            </Link>
+          ),
         }}
       />
     </Tabs>
