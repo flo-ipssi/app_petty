@@ -55,31 +55,31 @@ export default function TabLayout() {
         name="apartment"
         options={{
           tabBarShowLabel: false,
-          title: "Tab Two",
+          title: "Logement",
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
         }}
       />
       <Tabs.Screen
         name="setting"
         options={{
-          // headerShown: false,
+          headerShown: false,
           title:'',
           tabBarShowLabel: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="gear" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="gear"
-                    size={35}
-                    color={Colors[colorScheme ?? "light"].text}
-                    style={{ marginRight: 25, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
-          ),
+          // headerRight: () => (
+          //   <Link href="setting/modal" asChild>
+          //     <Pressable>
+          //       {({ pressed }) => (
+          //         <FontAwesome
+          //           name="gear"
+          //           size={35}
+          //           color={Colors[colorScheme ?? "light"].text}
+          //           style={{ marginRight: 25, opacity: pressed ? 0.5 : 1 }}
+          //         />
+          //       )}
+          //     </Pressable>
+          //   </Link>
+          // ),
         }}
       />
     </Tabs>

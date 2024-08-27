@@ -1,6 +1,7 @@
 import React, { FC } from 'react';
 import { TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from '@expo/vector-icons/FontAwesome5'; // Assurez-vous d'installer FontAwesome ou tout autre bibliothèque d'icônes
+import colors from '@/utils/colors';
 
 
 interface Props {
@@ -13,7 +14,7 @@ interface Props {
 const AnimalCheckbox: FC<Props> = ({ label, icon, isChecked, onPress }) => {
     return (
         <TouchableOpacity onPress={onPress} style={styles.container}>
-            <Icon name={icon} size={30} color={isChecked ? 'green' : 'black'} />
+            <Icon name={icon} size={30} color={isChecked ? 'black' : colors.SECONDARY_TRANSPARENT} />
             {/* <Text style={styles.label}>{label}</Text> */}
         </TouchableOpacity>
     )
