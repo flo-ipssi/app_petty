@@ -30,7 +30,7 @@ export default function Apartment() {
    const limit = 10;
    const swipe = useRef(new Animated.ValueXY()).current;
    const titleSign = useRef(new Animated.Value(1)).current;
-   const { signOut, session, user } = useSession();
+   const { session } = useSession();
 
    // Remove the top card from the pets array
    const removeTopCard = useCallback(() => {

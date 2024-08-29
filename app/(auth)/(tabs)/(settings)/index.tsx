@@ -257,11 +257,11 @@ const Account: FC<Props> = () => {
 
       <View style={styles.filterContainer}>
         <Text style={styles.label}>Paramètres</Text>
-        <TouchableOpacity style={[styles.button, { backgroundColor: "black" }]}>
-          <Link replace href="setting/modal">
+        <Link href="infos" style={[styles.button, { backgroundColor: "black" }]}>
+          <TouchableOpacity >
             <Text style={styles.editButtonText}>Editer les infos</Text>
-          </Link>
-        </TouchableOpacity>
+          </TouchableOpacity>
+        </Link>
 
         <TouchableOpacity
           style={[styles.button, { backgroundColor: colors.ERROR }]}
@@ -281,6 +281,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
   },
   button: {
+    textAlign:"center",
     alignItems: "center",
     marginHorizontal: "auto",
     marginVertical: 10,

@@ -12,7 +12,7 @@ const AppImagePicker: FC<Props> = ({ imgSource, onClick }) => {
 
     return <>
         {imgSource ? (
-        <View style={[styles.image]} >
+        <View>
             <Image source={imgSource} style={styles.image} />
             <TouchableOpacity style={styles.deleteButton} onPress={onClick}>
                 <AntDesign name="close"
@@ -34,8 +34,8 @@ const AppImagePicker: FC<Props> = ({ imgSource, onClick }) => {
 
 const styles = StyleSheet.create({
     image: {
-        width: 100,
-        height: 150,
+        width: 90,
+        height: 140,
         borderRadius: 10,
         margin: 5,
         borderColor: colors.OVERLAY,
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderStyle: "dashed",
         marginHorizontal: 8,
-        marginVertical: 10,
+        marginVertical: 5,
         backgroundColor: colors.GRAY
     },
 });

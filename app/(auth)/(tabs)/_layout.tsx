@@ -29,12 +29,21 @@ export default function TabLayout() {
         headerShown: useClientOnlyValue(false, true),
       }}
     >
+    <Tabs.Screen
+      name="(settings)"
+      options={{
+        headerShown: false,
+        title:'',
+        tabBarShowLabel: false,
+        tabBarIcon: ({ color }) => <TabBarIcon name="gear" color={color} />,
+      }}
+    />
       <Tabs.Screen
         name="index"
         options={{
           headerShown: false,
           tabBarShowLabel: false,
-          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="cards" size={30} color={colors.SECONDARY} />,
+          tabBarIcon: () => <MaterialCommunityIcons name="cards" size={30} color={colors.SECONDARY} />,
           // headerRight: () => (
           //   <Link href="/modal" asChild>
           //     <Pressable>
@@ -51,35 +60,21 @@ export default function TabLayout() {
           // ),
         }}
       />
+      
+      <Tabs.Screen
+        name="(conversation)"
+        options={{
+          tabBarShowLabel: false,
+          title: "Conversations",
+          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="message" size={25} color={color} />,
+        }}
+      />
       <Tabs.Screen
         name="apartment"
         options={{
           tabBarShowLabel: false,
           title: "Logement",
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="setting"
-        options={{
-          headerShown: false,
-          title:'',
-          tabBarShowLabel: false,
-          tabBarIcon: ({ color }) => <TabBarIcon name="gear" color={color} />,
-          // headerRight: () => (
-          //   <Link href="setting/modal" asChild>
-          //     <Pressable>
-          //       {({ pressed }) => (
-          //         <FontAwesome
-          //           name="gear"
-          //           size={35}
-          //           color={Colors[colorScheme ?? "light"].text}
-          //           style={{ marginRight: 25, opacity: pressed ? 0.5 : 1 }}
-          //         />
-          //       )}
-          //     </Pressable>
-          //   </Link>
-          // ),
         }}
       />
     </Tabs>

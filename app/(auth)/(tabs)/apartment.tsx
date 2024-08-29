@@ -10,19 +10,15 @@ import AppImagePicker from "@/components/ui/AppImagePicker";
 import CustomModal from "@/components/CustomModal";
 import * as ImagePicker from "expo-image-picker";
 import { UploadData } from "@/@types/upload";
+import { DataURIToBlob } from "@/app/helpers/uploadMedia";
 
 export default function TabOneScreen() {
-  const { signOut, session, user } = useSession();
+  const { session, user } = useSession();
   const [description, setDescription] = useState("");
   const [modalPhotoVisible, setModalPhotoVisible] = useState(false);
   const [modalDeletePhotoVisible, setModalDeletePhotoVisible] = useState(false);
   const [imageToDelete, setImageToDelete] = useState(null);
-  const [gallery, setGallery] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Query
-  // const { data, isLoading, refetch,isSuccess } = useFetchLatestResidence();
-
+  const [gallery, setGallery] = useState(Array(6).fill(null));
   const fetchLatestResidence = async (): Promise<UploadData[]> => {
     const res = await fetch(client + `upload/residence`, {
       method: "GET",
@@ -33,7 +29,8 @@ export default function TabOneScreen() {
       },
     });
     const data = await res.json();
-    setGallery(data?.uploads);
+    const filledGallery = [...data?.uploads, ...Array(6 - data?.uploads.length).fill(null)];
+    setGallery(filledGallery);
 
     return data;
   };
@@ -105,20 +102,6 @@ export default function TabOneScreen() {
     });
   };
 
-  const DataURIToBlob = (dataURI: string) => {
-    const splitDataURI = dataURI.split(",");
-    const byteString =
-      splitDataURI[0].indexOf("base64") >= 0
-        ? atob(splitDataURI[1])
-        : decodeURI(splitDataURI[1]);
-    const mimeString = splitDataURI[0].split(":")[1].split(";")[0];
-
-    const ia = new Uint8Array(byteString.length);
-    for (let i = 0; i < byteString.length; i++)
-      ia[i] = byteString.charCodeAt(i);
-
-    return new Blob([ia], { type: mimeString });
-  };
 
   const uploadFile = async (uploadImg: { assets: any[] }) => {
     const assets = uploadImg.assets[0];
@@ -138,9 +121,7 @@ export default function TabOneScreen() {
         method: "POST",
         body: formData,
         headers: {
-          Authorization: "Bearer " + session,
-          // 'Content-Type': 'multipart/form-data;',
-          // 'Access-Control-Allow-Origin': '*',
+          Authorization: "Bearer " + session
         },
       }).then(() => {
         fetchLatestResidence();
@@ -158,7 +139,7 @@ export default function TabOneScreen() {
     setModalDeletePhotoVisible(false);
     if (imageToDelete) {
       try {
-        const response = await fetch(client + "upload/delete", {
+        await fetch(client + "upload/delete", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -179,43 +160,32 @@ export default function TabOneScreen() {
     fetchLatestResidence();
   }, []);
   return (
-    <ScrollView>
-      <View style={styles.container}>
+    <ScrollView style={styles.container}>
+      <View style={styles.divContainer}>
         <Text style={styles.intitule}>Photos</Text>
         <View style={styles.row}>
-          {gallery.map(
-            (
-              item: any,
-              index
-            ) => {
-              return (
-                <View key={item.id} style={styles.cell}>
-                  <AppImagePicker
-                    key={item.id}
-                    onClick={() => {
-                      setModalDeletePhotoVisible(true);
-                      setImageToDelete(item);
-                    }}
-                    imgSource={{ uri: item.file.url }}
-                  />
-                </View>
-              );
-            }
-          )}
-
-          {gallery.length < 9 ? (
-            <><View style={styles.cell}>
-              <AppImagePicker onClick={() => setModalPhotoVisible(true)} />
-            </View><View style={styles.cell}>
-                <AppImagePicker onClick={() => setModalPhotoVisible(true)} />
-              </View><View style={styles.cell}>
-                <AppImagePicker onClick={() => setModalPhotoVisible(true)} />
-              </View><View style={styles.cell}>
-                <AppImagePicker onClick={() => setModalPhotoVisible(true)} />
-              </View><View style={styles.cell}>
-                <AppImagePicker onClick={() => setModalPhotoVisible(true)} />
-              </View></>
-          ) : null}
+          {gallery.map((item: UploadData | null, index) => {
+            return (
+              <View key={index}>
+                {item ? (
+                  <View style={styles.cell}>
+                    <AppImagePicker
+                      key={item.id}
+                      onClick={() => {
+                        setModalDeletePhotoVisible(true);
+                        setImageToDelete(item);
+                      }}
+                      imgSource={{ uri: item.file.url }}
+                    />
+                  </View>
+                ) : (
+                  <View style={styles.cell}>
+                    <AppImagePicker onClick={() => setModalPhotoVisible(true)} />
+                  </View>
+                )}
+              </View>
+            );
+          })}
 
           {/* Modal Photo */}
           <CustomModal
@@ -239,14 +209,16 @@ export default function TabOneScreen() {
 
         <Text style={styles.intitule}>À propos</Text>
 
-        <TextInput
-          style={styles.textArea}
-          multiline={true}
-          onChangeText={handleTextChange}
-          value={description}
-          placeholderTextColor={colors.OVERLAY}
-          placeholder="Décrivez vous en quelques lignes ..."
-        />
+        <View style={styles.row}>
+          <TextInput
+            style={styles.textArea}
+            multiline={true}
+            numberOfLines={4}
+            onChangeText={handleTextChange}
+            value={description}
+            placeholderTextColor={colors.OVERLAY}
+            placeholder="Décrivez vous en quelques lignes ..."
+          /></View>
       </View>
     </ScrollView>
   );
@@ -254,17 +226,22 @@ export default function TabOneScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    height:"100%",
-    alignItems: "center"
+    flex: 1
+  },
+  divContainer: {
+    margin: 10,
+    padding: 20,
+    borderRadius: 10,
   },
   row: {
+    backgroundColor: "white",
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "flex-start",
-    alignSelf: "flex-start",
+    justifyContent: "center",
+    alignSelf: "center",
     marginBottom: 18,
-    paddingStart: 25,
+    marginTop: 18,
+    paddingStart: 0,
   },
   cell: {
     // aspectRatio: 1,
@@ -274,20 +251,21 @@ const styles = StyleSheet.create({
   intitule: {
     marginTop: 10,
     fontSize: 18,
-    fontWeight: "bold",
     color: colors.DARK,
-    fontFamily: "Poppins-Regular",
+    fontFamily: "Poppins-SemiBold",
     alignSelf: "flex-start",
-    paddingHorizontal: 25,
+    paddingHorizontal: 15,
     paddingVertical: 10,
   },
   textArea: {
     borderWidth: 1,
+    textAlignVertical: 'top',
     borderColor: "#ccc",
     backgroundColor: "#FFF",
     borderRadius: 4,
-    padding: 10,
+    padding: 15,
     minHeight: 150,
+    fontFamily: "Poppins-Regular",
     width: "90%",
   },
 });
