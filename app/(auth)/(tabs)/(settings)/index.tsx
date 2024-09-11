@@ -17,15 +17,16 @@ import { useSession } from "@/app/ctx";
 import colors from "@/utils/colors";
 import SwipeButton from "@/components/SwipeButton";
 import { User } from "@/@types/user";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 
 type FilterKeys = "cat" | "dog" | "bird" | "other";
-interface Props { }
+interface Props {}
 
 const cities = ["paris", "lyon", "marseille"];
 
 const Account: FC<Props> = () => {
   const { session, user, signOut } = useSession();
+  const router = useRouter();
   const [userData, setUserData] = useState<User | null | undefined>(user);
   const [profileImage, setProfileImage] = useState(
     "https://via.placeholder.com/200"
@@ -257,17 +258,19 @@ const Account: FC<Props> = () => {
 
       <View style={styles.filterContainer}>
         <Text style={styles.label}>Paramètres</Text>
-        <Link href="infos" style={[styles.button, { backgroundColor: "black" }]}>
-          <TouchableOpacity >
-            <Text style={styles.editButtonText}>Editer les infos</Text>
-          </TouchableOpacity>
-        </Link>
+        <TouchableOpacity
+          onPress={() => router.navigate("infos")}
+          style={[styles.button, { backgroundColor: "black" }]}
+        >
+          <Text style={styles.editButtonText}>Editer les infos</Text>
+        </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.button, { backgroundColor: colors.ERROR }]}
           onPress={() => {
             signOut();
-          }}>
+          }}
+        >
           <Text style={styles.editButtonText}>Déconnexion</Text>
         </TouchableOpacity>
       </View>
@@ -281,7 +284,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
   },
   button: {
-    textAlign:"center",
+    textAlign: "center",
     alignItems: "center",
     marginHorizontal: "auto",
     marginVertical: 10,

@@ -1,7 +1,7 @@
 import React from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { Link, Tabs, useRouter } from "expo-router";
-import { Pressable, TouchableOpacity } from "react-native";
+import { Tabs, useRouter } from "expo-router";
+import { TouchableOpacity } from "react-native";
 
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
@@ -89,7 +89,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="(settings)"
+        name="(settings)/index"
         options={{
           headerShown: false,
           title: "",
@@ -97,6 +97,24 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <TabBarIcon name="gear" color={color} />,
         }}
       />
+      
+      <Tabs.Screen
+        name="infos"
+        options={{
+          tabBarButton: () => null,
+          title: "Informations",
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.navigate('(settings)')}>
+              <MaterialCommunityIcons
+                name="arrow-left"
+                size={30}
+                style={{ marginLeft: 10 }}
+              />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+
       <Tabs.Screen
         name="apartment"
         options={{
