@@ -16,6 +16,7 @@ import { Keys, getFromAsyncStorage } from "@/utils/asyncStorage";
 import { useDispatch, useSelector } from "react-redux";
 import { useSession } from "@/app/ctx";
 import client from "@/app/api/client";
+import { useGlobalSearchParams, useLocalSearchParams } from "expo-router";
 type Props = NativeStackScreenProps<MessagesInStackParamList, "Conversation">;
 
 const Conversation: FC<Props> = ({ route }) => {
@@ -25,6 +26,9 @@ const Conversation: FC<Props> = ({ route }) => {
   const [newMessage, setNewMessage] = useState("");
   const { conversationId, petInfos } = route.params;
 
+  const glob = useGlobalSearchParams();
+  const local = useLocalSearchParams();
+  console.log("Local:", local.id, "Global:", glob.id);
   async function fetchMessages() {
     try {
       const token = await getFromAsyncStorage(Keys.AUTH_TOKEN);

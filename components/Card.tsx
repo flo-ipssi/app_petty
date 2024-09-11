@@ -1,19 +1,24 @@
-import React, { Fragment, useCallback } from "react";
+import React, { Fragment, useCallback, useState } from "react";
 import { FC } from "react";
 import {
     Animated,
+    Button,
     Dimensions,
     Image,
-    ImageSourcePropType,
+    Pressable,
     StyleSheet,
     Text,
+    TouchableHighlight,
+    TouchableOpacity,
     View,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import ChoiceLabel from "./ChoiceLabel";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 interface Props {
+    handlePress?(): void;
     name: string;
     location: string;
     breed: string;
@@ -29,6 +34,7 @@ interface Props {
 const { width, height } = Dimensions.get("screen");
 
 const Card: FC<Props> = ({
+    handlePress,
     name,
     distance,
     location,
@@ -40,6 +46,10 @@ const Card: FC<Props> = ({
     titleSign,
     ...rest
 }) => {
+
+    const router = useRouter();
+    const [isButtonPressed, setIsButtonPressed] = useState(false);
+
     const rotate = Animated.multiply(swipe.x, titleSign).interpolate({
         inputRange: [-100, 0, 100],
         outputRange: ["8deg", "0deg", "-8deg"],
@@ -60,7 +70,7 @@ const Card: FC<Props> = ({
         outputRange: [1, 0],
         extrapolate: "clamp",
     });
-    
+
     const profilImage = upload.filter((upload: { profil: any; }) => upload.profil)
         .map((upload: { file: { url: any; }; }) => upload.file.url)[0]
 
@@ -94,34 +104,47 @@ const Card: FC<Props> = ({
     }, [likeOpacity, nopeOpacity]);
 
     return (
-        <Animated.View style={[styles.container, isFirst && animatedCardStyle]} {...rest}>
-            <Image
-                source={{
-                    uri: profilImage as string,
-                }}
-                style={styles.upload}
-            />
-            <LinearGradient
-                colors={["transparent", "rgba(0,0,0,0.8)"]}
-                style={styles.gradient}
-            >
-                <View style={styles.petContainer}>
-                    <Text style={styles.name}>
-                        {name} , {age}
-                    </Text>
-                    <Text style={styles.text}>
-                    <MaterialCommunityIcons name="map-marker" size={15} style={{paddingRight:5}} />
-                        Live in {location}
-                        </Text>            
-                    <Text style={styles.text}>
-                        <MaterialCommunityIcons name="paw" size={15} style={{paddingRight:5}} />
-                        {breed}
-                    </Text>
-                    {/* <Text style={styles.text}>{distance} miles away</Text> */}
-                </View>
-            </LinearGradient>
-            {isFirst && renderChoice()}
-        </Animated.View>
+        <Fragment>
+            <Animated.View pointerEvents="box-none" style={[styles.container, isFirst && animatedCardStyle]} {...rest}>
+
+                <Image
+                    source={{
+                        uri: profilImage as string,
+                    }}
+                    style={styles.upload}
+                />
+                <LinearGradient
+                    colors={["transparent", "rgba(0,0,0,0.8)"]}
+                    style={styles.gradient}
+                >
+                    <View style={styles.petContainer} 
+                            pointerEvents="box-none">
+                        <Text style={styles.name}>
+                            {name} , {age}
+                        </Text>
+                        <Text style={styles.text}>
+                            <MaterialCommunityIcons name="map-marker" size={15} style={{ paddingRight: 5 }} />
+                            Live in {location}
+                        </Text>
+                        <Text style={styles.text}>
+                            <MaterialCommunityIcons name="paw" size={15} style={{ paddingRight: 5 }} />
+                            {breed}
+                        </Text>
+                        {/* <Text style={styles.text}>{distance} miles away</Text> */}
+
+                        {/* Bouton pour naviguer vers la page de détails */}
+                        <TouchableOpacity
+                            style={styles.detailButton}
+                            onPress={handlePress}
+                            disabled={isButtonPressed}
+                        >
+                            <Text style={styles.detailButtonText}>Voir Détails</Text>
+                        </TouchableOpacity>
+                    </View>
+                </LinearGradient>
+                {isFirst && renderChoice()}
+            </Animated.View>
+        </Fragment>
     );
 };
 
@@ -130,6 +153,16 @@ const styles = StyleSheet.create({
         position: "absolute",
         top: 25,
         zIndex: 99999,
+    },
+    detailButton: {
+        marginTop: 10,
+        padding: 10,
+        backgroundColor: '#ff7f50',
+        borderRadius: 10,
+    },
+    detailButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
     },
     upload: {
         width: width * 0.9,

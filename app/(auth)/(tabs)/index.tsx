@@ -11,15 +11,27 @@ import { StatusBar } from "expo-status-bar";
 import Card from "@/components/Card";
 import SwipeButtonsContainer from "@/components/SwipeButtonsContainer";
 import { fetchPets } from "@/app/api/apiService";
+import { useRouter } from "expo-router";
+import RessourceNotAvailable from "@/components/ui/RessourceNotAvailable";
 
+interface SlideData {
+   file: {
+      publicId: string;
+      url: string;
+   };
+}
 type Pet = {
    id: string | number;
    name: string;
+   user: any;
    location: string;
+   gender: string;
    breed: string;
+   weight: number;
+   description: string;
    distance: number;
    age: number;
-   uploads: any;
+   uploads: SlideData[] | undefined | null;
 };
 
 const { height } = Dimensions.get("screen");
@@ -54,6 +66,7 @@ export default function Apartment() {
          try {
             if (session) {
                const newPets = await fetchPets(page, limit, session);
+
                setPets((prevPets) => [...prevPets, ...newPets]);
             }
          } catch (error) {
@@ -69,13 +82,22 @@ export default function Apartment() {
          setPage((prevPage) => prevPage + 1);
       }
    }, [pets.length]);
+
+   const router = useRouter();
+
    return (
       <View style={styles.container}>
          <StatusBar hidden={true} />
-         {pets.map(({ name, uploads, location, distance, age, breed }, index) => {
+
+         {pets.length > 0 ? pets.map(({ id, name, uploads, location, distance, age, user, weight, gender, breed, description }, index) => {
             const isFirst = index === 0;
             const panResponder = PanResponder.create({
-               onMoveShouldSetPanResponder: () => isFirst,
+               onStartShouldSetPanResponder: () => false,
+               onMoveShouldSetPanResponder: (_, { dx, dy }) => {
+                  // Active PanResponder seulement si le déplacement est important
+                  return Math.abs(dx) > 10 || Math.abs(dy) > 10;
+               },
+               // onMoveShouldSetPanResponder: () => isFirst,
                onPanResponderMove: (_, { dx, dy, y0 }) => {
                   swipe.setValue({ x: dx, y: dy });
                   titleSign.setValue(y0 > height / 2 ? 1 : -1);
@@ -105,6 +127,15 @@ export default function Apartment() {
 
             const dragHandlers = isFirst ? panResponder.panHandlers : {};
 
+            let images = JSON.stringify(uploads)
+            let infosUser = JSON.stringify(user)
+            
+            const handlePress = () => {
+               router.push({
+                  pathname: "/details",
+                  params: { name, age, breed, location, images, infosUser, weight, gender, description },
+               });
+            };
             return (
                <Card
                   key={name}
@@ -118,9 +149,14 @@ export default function Apartment() {
                   swipe={swipe}
                   titleSign={titleSign}
                   {...dragHandlers}
+                  handlePress={handlePress}
                />
             );
-         }).reverse()}
+         }).reverse() :
+            <RessourceNotAvailable
+               title="Oops!"
+               message="Aucun animaux disponible :("
+            />}
          <SwipeButtonsContainer handleChoice={(direction) => {
             handleChoice(direction);
          }} />

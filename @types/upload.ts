@@ -1,6 +1,7 @@
 import { categoriesTypes } from "@/utils/categories";
 
 export interface UploadData {
+  id: Key | null | undefined;
   cards: Array<{
     uploads: any;
     uri: string;

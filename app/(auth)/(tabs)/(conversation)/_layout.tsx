@@ -10,7 +10,7 @@ export default function Layout() {
                 }}
             />
             <Stack.Screen
-                name="(chat)"
+                name="chat/[id]"
                 options={{
                     title: "Chat"
                 }}
