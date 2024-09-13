@@ -6,10 +6,11 @@ type filterType = "error" | "success";
 
 export interface Filter {
   _id: string;
-  location: string[] | undefined | null;
-  gender: string[] | undefined | null;
-  ageMin: number | undefined | null;
-  ageMax: number | undefined | null;
+  location: string[] ;
+  gender: string[];
+  ageMin: number;
+  ageMax: number;
+  distance: number;
   isCat: boolean;
   isDog: boolean;
   isBird: boolean;
@@ -22,6 +23,7 @@ const initialState: Filter = {
   gender: [],
   ageMin: 0,
   ageMax: 0,
+  distance: 0,
   isCat: false,
   isDog: false,
   isBird: false,

@@ -8,52 +8,20 @@ import {
   View,
 } from "react-native";
 import colors from "@/utils/colors";
-import {
-  Keys,
-  getFromAsyncStorage,
-  removeFromAsyncStorage,
-} from "@/utils/asyncStorage";
 import _ from "lodash";
 import { useSession } from "@/app/ctx";
 import client from "@/app/api/client";
-import { User } from "@/@types/user";
 import AvatarField from "@/components/ui/AvatarField";
 import { AntDesign, Entypo, MaterialIcons } from "@expo/vector-icons";
 
 interface Props { }
 const Infos: FC<Props> = () => {
-  const { signOut, session, user } = useSession();
-  const [userInfo, setUserInfo] = useState<User | null | undefined>(user);
-  const [busy, setBusy] = useState(false);
+  const { signOut, session, user, setUser } = useSession();
   const [name, setName] = useState('');
   const [avatar, setAvatar] = useState('');
 
-
-  const handleLogout = async (fromAll?: boolean) => {
-    try {
-      const token = await getFromAsyncStorage(Keys.AUTH_TOKEN);
-      if (!token) return;
-      await fetch(
-        client + "auth/log-out?fromAll=" + (fromAll ? "yes" : ""),
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      await removeFromAsyncStorage(Keys.AUTH_TOKEN);
-    } catch (error) {
-      console.log(error); 
-    }
-  };
-
   const handleDeleteAccount = () => {
-    // Code pour supprimer le compte de l'utilisateur
   };
-
 
 
   const handleImageSelect = async () => {
@@ -73,25 +41,29 @@ const Infos: FC<Props> = () => {
   const handleTextChange = (inputText: React.SetStateAction<string>) => {
     setName(inputText);
     saveName(inputText);
+    setUser((prevUser) => {
+      if (!prevUser) return prevUser;
+      return {
+        ...prevUser,
+        name: inputText as string,
+      };
+    });
   };
   const saveName = useCallback(
     _.debounce(async (newName) => {
-      // Exemple d'appel API avec un token
-      const token = await getFromAsyncStorage(Keys.AUTH_TOKEN);
-      if (!token) return;
-
       try {
         const res = await fetch(client + `profile/save/infos`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${session}`,
           },
           body: JSON.stringify({ newName: newName }),
+
         });
         const data = await res.json();
-        console.log("Name saved:", data);
+
         return data;
       } catch (error) {
         console.error("Error saving description", error);
@@ -100,11 +72,11 @@ const Infos: FC<Props> = () => {
     []
   );
   useEffect(() => {
-    if (userInfo) {
-      setName(userInfo.name)
-      setAvatar(userInfo.avatar)
+    if (user) {
+      setName(user.name)
+      setAvatar(user.avatar)
     }
-  }, [userInfo]);
+  }, [user]);
 
   return (
     <View style={styles.container}>
@@ -117,17 +89,17 @@ const Infos: FC<Props> = () => {
         <View style={styles.avatarContainer}>
           {/* <AvatarField source={userInfo.avatar} /> */}
           <AvatarField source={avatar} />
-          <Pressable onPress={handleImageSelect} style={styles.paddingLeft}>
+          <View style={styles.paddingLeft}>
             <Text style={styles.linkText}>Profil</Text>
             <View style={styles.emailConainer}>
-              <Text style={styles.email}>{userInfo?.email}</Text>
+              <Text style={styles.email}>{user?.email}</Text>
               <MaterialIcons
                 name="verified"
                 size={15}
                 color={colors.SECONDARY}
               />
             </View>
-          </Pressable>
+          </View>
         </View>
         <TextInput
           onChangeText={handleTextChange}
@@ -149,7 +121,7 @@ const Infos: FC<Props> = () => {
                   <Text style={styles.logoutBtnTitle}>Se déconnecter</Text>
               </TouchableOpacity> */}
         <TouchableOpacity
-          onPress={() => handleLogout(true)}
+          onPress={signOut}
           style={[styles.button, styles.buttonColor, styles.logoutBtn]}
         >
           <AntDesign name="logout" size={20} color={colors.INACTIVE_CONTRAST} />

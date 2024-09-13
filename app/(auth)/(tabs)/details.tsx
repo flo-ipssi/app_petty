@@ -39,7 +39,7 @@ export default function Details() {
     : require("../../../assets/error.jpg");
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor:'#FFF' }}>
       <ScrollView style={styles.container}>
         <CarrouselComponent slideList={uploadImages} />
         <View style={styles.infoContainer}>

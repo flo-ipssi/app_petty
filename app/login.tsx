@@ -37,7 +37,7 @@ export default function Login() {
   const { signIn, errorMessage, session, user } = useSession();
   const [secureEntry, setSecureEntry] = useState(true);
   const navigation = useNavigation();
-  
+
   const togglePassword = () => {
     setSecureEntry(!secureEntry)
   };
@@ -53,7 +53,7 @@ export default function Login() {
 
   useEffect(() => {
     if (session) {
-      router.replace('/'); 
+      router.replace('/');
     }
   }, [session]);
 
@@ -70,9 +70,9 @@ export default function Login() {
       >
         <View style={styles.formContainer}>
           <Link href="/SignUp" asChild>
-              <Pressable>
-                <Text style={styles.link} >Pas encore inscrit ? Inscription</Text>
-              </Pressable>
+            <Pressable>
+              <Text style={styles.link} >Pas encore inscrit ? Inscription</Text>
+            </Pressable>
           </Link>
           <AuthInputField
             name="email"
@@ -95,9 +95,9 @@ export default function Login() {
           <SubmitBtn title={"Sign in".toLocaleUpperCase()} />
 
           <View style={styles.linkContainer}>
-            <AppLink title='Mot de passe oublié ?' onPress={() => {
-              // navigation.navigate('LostPassword')
-            }} />
+            <Link href="/LostPassword">
+              <AppLink title='Mot de passe oublié ?' />
+            </Link>
           </View>
         </View>
       </AuthFormConainer>
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   },
   link: {
     textAlign: "center",
-    marginBottom:15,
+    marginBottom: 15,
     backgroundColor: "transparent",
     color: colors.SECONDARY,
   },

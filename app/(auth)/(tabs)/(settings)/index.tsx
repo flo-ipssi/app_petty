@@ -5,10 +5,9 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Button,
-  Pressable,
+  Dimensions,
 } from "react-native";
-import { FC, SetStateAction, useState, useCallback } from "react";
+import { FC, useState, useEffect } from "react";
 import * as ImagePicker from "expo-image-picker";
 import Slider from "@react-native-community/slider";
 import _ from "lodash";
@@ -16,94 +15,76 @@ import AnimalCheckbox from "@/components/ui/AnimalCheckbox";
 import { useSession } from "@/app/ctx";
 import colors from "@/utils/colors";
 import SwipeButton from "@/components/SwipeButton";
-import { User } from "@/@types/user";
-import { Link, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
+import client from "@/app/api/client";
+import { DataURIToBlob } from "@/app/helpers/uploadMedia";
 
-type FilterKeys = "cat" | "dog" | "bird" | "other";
-interface Props {}
+type FilterKeys = "isCat" | "isDog" | "isBird" | "isOther";
+interface Props { }
 
-const cities = ["paris", "lyon", "marseille"];
+const cities = ["paris", "lyon", "marseille", "toulouse", "nice"];
 
 const Account: FC<Props> = () => {
-  const { session, user, signOut } = useSession();
+  const { session, user, filtersData,setFiltersData, setReloadPets,signOut } = useSession();
   const router = useRouter();
-  const [userData, setUserData] = useState<User | null | undefined>(user);
   const [profileImage, setProfileImage] = useState(
-    "https://via.placeholder.com/200"
+    user?.avatar ? user.avatar : "https://via.placeholder.com/200"
   );
-  const [selectedCities, setSelectedCities] = useState([]);
-  const [modalPhotoVisible, setModalPhotoVisible] = useState(false);
-  const [filter, setFilter] = useState<{
-    cat: boolean;
-    dog: boolean;
-    bird: boolean;
-    other: boolean;
-    age: number;
-    distance: number;
-  }>({
-    cat: false,
-    dog: false,
-    bird: false,
-    other: false,
-    age: 1,
-    distance: 1,
-  });
 
   const toggleFilter = (key: FilterKeys) => {
-    setFilter((prevState) => ({
+    setFiltersData((prevState) => ({
       ...prevState,
       [key]: !prevState[key],
     }));
   };
 
-  const setDistance = (value: number) => {
-    setFilter((prevState) => ({
+  const setDistance = (value: number) => {   
+    setFiltersData((prevState) => ({
       ...prevState,
       distance: value,
     }));
   };
 
-  const setAge = (value: number) => {
-    setFilter((prevState) => ({
+  const setAgeMax = (value: number) => {
+    setFiltersData((prevState) => ({
       ...prevState,
-      age: value,
+      ageMax: value,
     }));
   };
 
-  // const uploadFile = async (uploadImg: { canceled?: false; assets: any; }) => {
-  //   const assets = uploadImg.assets[0];
-  //   let split = assets.uri.split("/");
-  //   let type = split[1].split(";")[0];
+  const uploadFile = async (uploadImg: { canceled?: false; assets: any; }) => {
+    const assets = uploadImg.assets[0];
+    let split = assets.uri.split("/");
+    let type = split[1].split(";")[0];
 
-  //   // Change data to blob
-  //   const file = DataURIToBlob(assets.uri);
+    // Change data to blob
+    const file = DataURIToBlob(assets.uri);
 
-  //   const formData = new FormData();
-  //   formData.append("upload", file);
-  //   formData.append("type", type);
-  //   formData.append("file", assets.uri);
+    const formData = new FormData();
+    formData.append("upload", file);
+    formData.append("type", type);
+    formData.append("file", assets.uri);
 
-  //   try {
-  //     const response = await fetch(client + "upload/create/User", {
-  //       method: "POST",
-  //       body: formData,
-  //       headers: {
-  //         Authorization: "Bearer " + session,
-  //       },
-  //     });
+    try {
+      const response = await fetch(client + "upload/create/User", {
+        method: "POST",
+        body: formData,
+        headers: {
+          Authorization: "Bearer " + session,
+        },
+      });
 
-  //     if (response.ok) {
-  //       const data = await response.json();
-  //       console.log(data);
+      if (response.ok) {
+        const data = await response.json();
+        setProfileImage(data.result);
+      }
+    } catch (error) {
+      let errorResponse = await error;
+      console.log(errorResponse);
 
-  //       setProfileImage(data.result);
-  //     }
-  //   } catch (error) {
-  //     let errorResponse = await error;
-  //     console.log(errorResponse);
+    }
+  };
 
-  //   }
-  // };
   const selectImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -114,38 +95,30 @@ const Account: FC<Props> = () => {
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
       setProfileImage(result.assets[0].uri);
-      debouncedSaveProfile(); // Save immediately after image is selected
+      await uploadFile(result);
     }
   };
 
-  const toggleSelection = (
-    item: any,
-    selectedItems: never[],
-    setSelectedItems: {
-      (value: SetStateAction<never[]>): void;
-      (value: SetStateAction<never[]>): void;
-      (arg0: (prevItems: any) => any): void;
-    }
-  ) => {
-    setSelectedItems((prevItems: any[]) => {
-      const newSelection = prevItems.includes(item)
-        ? prevItems.filter((i: any) => i !== item)
-        : [...prevItems, item];
-      debouncedSaveProfile(); // Save profile after selection change
-      return newSelection;
+  const handleCityToggle = (city: string) => {
+    setFilters((prevFilters) => {
+      const isSelected = prevFilters.location.includes(city);
+      const updatedLocations = isSelected
+        ? prevFilters.location.filter(selectedCity => selectedCity !== city)
+        : [...prevFilters.location, city];
+
+      return {
+        ...prevFilters,
+        location: updatedLocations,
+      };
     });
   };
 
-  const renderTags = (
-    items: any[],
-    selectedItems: string | any[],
-    onToggle: { (city: any): void; (breed: any): void; (arg0: any): void }
-  ) => {
-    return items.map((item: any) => (
+  const renderTags = (items: string[], selectedItems: string[], onToggle?: (city: string) => void) => {
+    return items.map((item: string) => (
       <TouchableOpacity
         key={item}
         style={[styles.tag, selectedItems.includes(item) && styles.selectedTag]}
-        onPress={() => onToggle(item)}
+        onPress={() => onToggle && onToggle(item)}
         accessibilityRole="button"
         accessibilityState={{ selected: selectedItems.includes(item) }}
       >
@@ -161,17 +134,32 @@ const Account: FC<Props> = () => {
     ));
   };
 
-  // Function to save the profile
-  const saveProfile = () => {
-    console.log("Profile saved:", { profileImage, selectedCities, filter });
-  };
+  async function updateData() {
+    try {
+      if (!session) return;
+      await fetch(client + "filter/update-filters", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          Authorization: `Bearer ${session}`,
+        },
+        body: JSON.stringify(filtersData),
+      });
+    } catch (error) {
+      console.log("Filter error: " + error);
+    }
+    setReloadPets(true)
+  }
 
-  // Debounced version of saveProfile to prevent excessive saves
-  const debouncedSaveProfile = useCallback(_.debounce(saveProfile, 1000), [
-    profileImage,
-    selectedCities,
-    filter,
-  ]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      updateData();
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [filtersData]);
 
   return (
     <ScrollView style={styles.container}>
@@ -189,19 +177,17 @@ const Account: FC<Props> = () => {
           onPress={selectImage}
         />
         <View style={{ alignSelf: "center", marginBottom: 15, marginTop: -40 }}>
-          <Text style={styles.title}>{userData?.name}</Text>
+          <Text style={styles.title}>{user?.name}</Text>
         </View>
       </View>
 
       <View style={styles.filterContainer}>
-        <Text style={styles.label}>Cities</Text>
+        <Text style={styles.label}>Villes</Text>
         <View style={styles.checkboxContainer}>
-          {renderTags(cities, selectedCities, (city: any) =>
-            toggleSelection(city, selectedCities, setSelectedCities)
-          )}
+          {renderTags(cities, filtersData.location, handleCityToggle)}
         </View>
 
-        <Text style={styles.label}>Distance: {filter.distance} km</Text>
+        <Text style={styles.label}>Distance: {filtersData.distance} km</Text>
         <Slider
           maximumTrackTintColor={colors.SECONDARY}
           thumbTintColor={colors.SECONDARY}
@@ -209,12 +195,12 @@ const Account: FC<Props> = () => {
           minimumValue={1}
           maximumValue={80}
           step={1}
-          value={filter.distance}
+          value={filtersData.distance}
           onValueChange={setDistance}
-          accessibilityLabel={`Distance: ${filter.distance} km`}
+          accessibilityLabel={`Distance: ${filtersData.distance} km`}
         />
 
-        <Text style={styles.label}>Age: {filter.age} years</Text>
+        <Text style={styles.label}>Age: {filtersData.ageMax} years</Text>
         <Slider
           maximumTrackTintColor={colors.SECONDARY}
           thumbTintColor={colors.SECONDARY}
@@ -222,9 +208,9 @@ const Account: FC<Props> = () => {
           minimumValue={1}
           maximumValue={20}
           step={1}
-          value={filter.age}
-          onValueChange={setAge}
-          accessibilityLabel={`Select age: ${filter.age} years`}
+          value={filtersData.ageMax}
+          onValueChange={setAgeMax}
+          accessibilityLabel={`Select age: ${filtersData.ageMax} years`}
         />
 
         <Text style={styles.label}>Animaux</Text>
@@ -232,26 +218,26 @@ const Account: FC<Props> = () => {
           <AnimalCheckbox
             icon="cat"
             label="Chat"
-            isChecked={filter.cat}
-            onPress={() => toggleFilter("cat")}
+            isChecked={filtersData.isCat}
+            onPress={() => toggleFilter("isCat")}
           />
           <AnimalCheckbox
             icon="dog"
             label="Chien"
-            isChecked={filter.dog}
-            onPress={() => toggleFilter("dog")}
+            isChecked={filtersData.isDog}
+            onPress={() => toggleFilter("isDog")}
           />
           <AnimalCheckbox
             icon="crow"
             label="Oiseaux"
-            isChecked={filter.bird}
-            onPress={() => toggleFilter("bird")}
+            isChecked={filtersData.isBird}
+            onPress={() => toggleFilter("isBird")}
           />
           <AnimalCheckbox
             icon="paw"
             label="Autres"
-            isChecked={filter.other}
-            onPress={() => toggleFilter("other")}
+            isChecked={filtersData.isOther}
+            onPress={() => toggleFilter("isOther")}
           />
         </View>
       </View>
@@ -362,9 +348,11 @@ const styles = StyleSheet.create({
     height: 40,
   },
   checkboxContainer: {
-    alignItems: "center",
+    alignItems: "flex-start",
     flexDirection: "row",
+    flexWrap: "wrap",
     marginVertical: 15,
+    width: "100%"
   },
   tag: {
     paddingVertical: 8,
@@ -375,6 +363,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
     marginBottom: 10,
     backgroundColor: "white",
+    alignSelf: "center"
   },
   selectedTag: {
     backgroundColor: colors.SECONDARY,

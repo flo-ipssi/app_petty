@@ -42,7 +42,7 @@ export default function Apartment() {
    const limit = 10;
    const swipe = useRef(new Animated.ValueXY()).current;
    const titleSign = useRef(new Animated.Value(1)).current;
-   const { session } = useSession();
+   const { session, reloadPets, setReloadPets} = useSession();
 
    // Remove the top card from the pets array
    const removeTopCard = useCallback(() => {
@@ -60,6 +60,12 @@ export default function Apartment() {
    }, [removeTopCard, swipe.x]
    )
 
+   useEffect(() => {
+      if (reloadPets) {
+        setPage(1); 
+        setPets([]);
+      }
+    }, [reloadPets]);
 
    useEffect(() => {
       const loadPets = async () => {
@@ -72,10 +78,11 @@ export default function Apartment() {
          } catch (error) {
             console.error("Erreur lors du chargement des animaux :", error);
          }
+         setReloadPets(false);
       };
 
       loadPets();
-   }, [page]);
+   }, [page, reloadPets, session]);
 
    useEffect(() => {
       if (pets.length === 0) {
