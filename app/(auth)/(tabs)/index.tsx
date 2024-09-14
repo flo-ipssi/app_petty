@@ -129,8 +129,6 @@ export default function Apartment() {
                   const isActionActive = Math.abs(dx) > 100;
 
                   if (isActionActive) {
-                    console.log("ok" + direction);
-                    console.log(_id);
                     Animated.timing(swipe, {
                       duration: 200,
                       toValue: {
@@ -182,7 +180,7 @@ export default function Apartment() {
               };
               return (
                 <Card
-                  key={name}
+                  key={index}
                   name={name}
                   location={location}
                   breed={breed}

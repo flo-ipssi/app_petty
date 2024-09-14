@@ -12,8 +12,9 @@ import AuthInputField from '@/components/AuthInputField';
 import PassewordVisibilityIcon from '@/components/ui/PassewordVisibilityIcon';
 import SubmitBtn from '@/components/SubmitBtn';
 import AppLink from '@/components/ui/AppLink';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import colors from '@/utils/colors';
+import Toast from 'react-native-toast-message';
 
 // Schema de validation
 const signupSchema = yup.object().shape({
@@ -48,7 +49,7 @@ const initialValues = {
 };
 
 const SignUp: FC<Props> = props => {
-
+  const router = useRouter()
   const [secureEntry, setSecureEntry] = useState(true);
 
   // const dispatch = useDispatch()
@@ -65,10 +66,14 @@ const SignUp: FC<Props> = props => {
     values: NewUser,
     actions: FormikHelpers<NewUser>
   ) => {
-    actions.setSubmitting(true)
+    actions.setSubmitting(true);
+
+    const showToast = (type: 'success' | 'error', text1: string, text2: string) => {
+      Toast.show({ type, text1, text2 });
+    };
+
     try {
-      
-      const reponse = await fetch(client + "auth/create", {
+      const response = await fetch(`${client}auth/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -77,25 +82,23 @@ const SignUp: FC<Props> = props => {
         body: JSON.stringify(values),
       });
 
-      if (!reponse.ok) {
-        // Servor error
-        let errorResponse = await reponse.json();
-        const errorMessage = catchAsyncError(errorResponse.error);
+      if (!response.ok) {
+        const errorResponse = await response.json();
+        showToast('error', 'Erreur', errorResponse.error);
       } else {
-        const resultat = await reponse.json();
-        // navigation.navigate('Verification', { userInfo: resultat.user })
+        showToast('success', 'Vérification', 'Checker votre email 👋');
+        const resultat = await response.json();
+        router.push(`/Verification?userInfo=${JSON.stringify(resultat.user)}`);
       }
     } catch (error) {
-      // Connexion errors      
-      const errorMessage = catchAsyncError(error);
-      console.log(error);
-      
+      console.error(error);
+      showToast('error', 'Erreur', error as string);
+    } finally {
+      actions.setSubmitting(false);
     }
-
-    actions.setSubmitting(false)
   };
   // <AuthInputField
-    // name="phone"
+  // name="phone"
   //   placeholder="06.XX.XX.XX.XX"
   //   label="Please enter your phone"
   //   keyboardType="email-address"
@@ -114,9 +117,9 @@ const SignUp: FC<Props> = props => {
       >
         <View style={styles.formContainer}>
           <Link href="/login" asChild>
-              <Pressable>
-                <Text style={styles.link} >Déjà inscrit ? Connexion</Text>
-              </Pressable>
+            <Pressable>
+              <Text style={styles.link} >Déjà inscrit ? Connexion</Text>
+            </Pressable>
           </Link>
           <AuthInputField
             name="name"
@@ -163,7 +166,7 @@ const styles = StyleSheet.create({
   },
   link: {
     textAlign: "center",
-    marginBottom:15,
+    marginBottom: 15,
     backgroundColor: "transparent",
     color: colors.SECONDARY,
   },

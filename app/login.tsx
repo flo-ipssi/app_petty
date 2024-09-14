@@ -48,7 +48,6 @@ export default function Login() {
 
   const handleLogin = (values: SignInUserInfo) => {
     signIn(values.email, values.password);
-    router.replace("/");
   };
 
   useEffect(() => {

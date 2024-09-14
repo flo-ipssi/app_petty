@@ -5,63 +5,83 @@ import colors from '@/utils/colors';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import client from '@/app/api/client';
-import { useDispatch } from 'react-redux';
-import catchAsyncError from '@/app/api/catchError';
 import { AuthStackParamList } from '@/@types/navigation';
 import OTPField from '@/components/ui/OTPField';
 import AppButton from '@/components/ui/AppButton';
 import AppLink from '@/components/ui/AppLink';
+import { useGlobalSearchParams, useRouter } from 'expo-router';
 
 
 type Props = NativeStackScreenProps<AuthStackParamList, "Verification">
 const otpFields = new Array(6).fill('')
 
 const Verification: FC<Props> = ({ route }) => {
-
-    const navigation = useNavigation<NavigationProp<AuthStackParamList>>();
+    const router = useRouter();
     const [otp, setOtp] = useState([...otpFields]);
     const [activeOtpIndex, setActiveOtpIndex] = useState(0);
     const [submitting, setSubmitting] = useState(false);
     const [countDown, setCountDown] = useState(60);
     const [canSendNewOtpRequest, setCanSendNewOtpRequest] = useState(false);
     const inputRef = useRef<TextInput>(null);
+    const params = useGlobalSearchParams();
+    const userInfo = Array.isArray(params.userInfo) ? params.userInfo[0] : params.userInfo;
 
-    const dispatch = useDispatch()
-    const { userInfo } = route.params;
 
     const isValidOTP = otp.every(value => {
         return value.trim()
     })
+    
     const handleSubmit = async () => {
+        // Vérifie si l'OTP est valide (tous les champs OTP doivent être remplis)
+        const isValidOTP = otp.every(value => value.trim() !== "");
         if (!isValidOTP) return;
-
-        setSubmitting(true)
+    
+    
+        if (!userInfo) {
+            console.error('Paramètre userInfo manquant ou invalide.');
+            return;
+        }
+    
+        let parsedUserInfo;
         try {
+            parsedUserInfo = JSON.parse(userInfo);  
+        } catch (error) {
+            console.error('Erreur lors du parsing de userInfo:', error);
+            return;
+        }
+    
+        if (!parsedUserInfo.id) {
+            console.error('L\'objet utilisateur ne contient pas de propriété id.');
+            return;
+        }
+    
+        setSubmitting(true);
+        try {
+            // Envoi de la requête de vérification d'email
             const reponse = await fetch(client + "auth/verify-email", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    userId: userInfo.id,
-                    token: otp.join('')
+                    userId: parsedUserInfo.id,
+                    token: otp.join(''),
                 }),
             });
-
+    
             if (!reponse.ok) {
-                // Servor error
                 const erreurServeur = await reponse.json();
                 console.error('Erreur du serveur:', erreurServeur);
             } else {
-                navigation.navigate('SignIn');
+                router.replace('/');
             }
-
         } catch (erreur) {
-            // Connexion errors
             console.error('Erreur lors de la requête:', erreur);
+        } finally {
+            setSubmitting(false); 
         }
-        setSubmitting(false)
-    }
+    };
+    
 
 
     const handleChange = (value: string, index: number) => {
@@ -94,15 +114,26 @@ const Verification: FC<Props> = ({ route }) => {
         setCountDown(60);
         setCanSendNewOtpRequest(false);
 
+        let parsedUserInfo;
         try {
-            const reponse = await fetch(client + "auth/re-verify-email", {
+            parsedUserInfo = JSON.parse(userInfo);  
+        } catch (error) {
+            console.error('Erreur lors du parsing de userInfo:', error);
+            return;
+        }
+    
+        if (!parsedUserInfo.id) {
+            console.error('L\'objet utilisateur ne contient pas de propriété id.');
+            return;
+        }
+        try {
+            await fetch(client + "auth/re-verify-email", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*', // Permet les requêtes depuis toutes les origines
                 },
                 body: JSON.stringify({
-                    userId: userInfo.id
+                    userId: parsedUserInfo.id
                 }),
             });
 

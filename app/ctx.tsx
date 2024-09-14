@@ -3,7 +3,7 @@ import { useStorageState } from "./useStorageState";
 import axios from 'axios';
 import client from "@/app/api/client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
+import { router, useRouter } from "expo-router";
 
 type User = {
   id: string;
@@ -213,6 +213,7 @@ export function SessionProvider(props: React.PropsWithChildren) {
 
             await AsyncStorage.setItem('session', token);
             await AsyncStorage.setItem('user', JSON.stringify(userData));
+            router.navigate("/(tabs)")
           } catch (error) {
             console.error("Login failed:", error);
             setErrorMessage("Failed to sign in. Please check your credentials.");

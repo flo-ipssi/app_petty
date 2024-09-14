@@ -100,7 +100,7 @@ const Account: FC<Props> = () => {
   };
 
   const handleCityToggle = (city: string) => {
-    setFilters((prevFilters) => {
+    setFiltersData((prevFilters) => {
       const isSelected = prevFilters.location.includes(city);
       const updatedLocations = isSelected
         ? prevFilters.location.filter(selectedCity => selectedCity !== city)

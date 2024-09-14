@@ -8,7 +8,7 @@ export type AuthStackParamList = {
     SignIn: undefined;
     SignUp: undefined;
     LostPassword: undefined;
-    Verification: { userInfo: NewUserResponse };
+    Verification: undefined;
 };
 
 export type LoggedInStackParamList = {
