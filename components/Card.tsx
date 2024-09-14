@@ -46,8 +46,6 @@ const Card: FC<Props> = ({
     titleSign,
     ...rest
 }) => {
-
-    const router = useRouter();
     const [isButtonPressed, setIsButtonPressed] = useState(false);
 
     const rotate = Animated.multiply(swipe.x, titleSign).interpolate({

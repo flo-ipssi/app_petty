@@ -19,3 +19,24 @@ export const fetchPets = async (page: number, limit: number, session:string) => 
         throw error;
     }
 };
+
+
+export async function likeChoice(id: any, choiceSwipe: boolean, session:any) {
+    try {
+      if (!session) return;
+      await fetch(client + "swipe/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          Authorization: `Bearer ${session}`,
+        },
+        body: JSON.stringify({
+          petId: id,
+          like: choiceSwipe,
+        }),
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  }
