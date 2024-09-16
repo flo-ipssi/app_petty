@@ -213,11 +213,12 @@ export function SessionProvider(props: React.PropsWithChildren) {
 
             await AsyncStorage.setItem('session', token);
             await AsyncStorage.setItem('user', JSON.stringify(userData));
-            router.navigate("/(tabs)")
+
           } catch (error) {
             console.error("Login failed:", error);
             setErrorMessage("Failed to sign in. Please check your credentials.");
           }
+
         },
         signOut,
         session,

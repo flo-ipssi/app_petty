@@ -10,7 +10,6 @@ import {
   Image,
   Dimensions,
 } from "react-native";
-
 const { width: screenWidth } = Dimensions.get("window");
 
 export default function Details() {
@@ -39,7 +38,7 @@ export default function Details() {
     : require("../../../assets/error.jpg");
 
   return (
-    <View style={{ flex: 1, backgroundColor:'#FFF' }}>
+    <View style={{ flex: 1, backgroundColor: "#FFF" }}>
       <ScrollView style={styles.container}>
         <CarrouselComponent slideList={uploadImages} />
         <View style={styles.infoContainer}>
@@ -61,7 +60,20 @@ export default function Details() {
         <View style={styles.infoPetContainer}>
           <View style={styles.box}>
             <Text style={styles.titleBox}>Sexe</Text>
-            <Text style={styles.responseBox}>{gender}</Text>
+            <Text style={styles.responseBox}>
+              {/* {gender} */}
+              { gender == "femelle" ||  gender == "female"? (
+                <MaterialCommunityIcons
+                  name="gender-female"
+                  size={30}
+                  style={{ marginLeft: 10 }} />
+              ) : (
+                <MaterialCommunityIcons
+                  name="gender-male"
+                  size={30}
+                  style={{ marginLeft: 10 }} />
+              ) }
+            </Text>
           </View>
 
           <View style={styles.box}>
@@ -131,7 +143,7 @@ const styles = StyleSheet.create({
   titleBox: {
     color: colors.DARK,
     alignSelf: "center",
-    fontFamily: "Poppins-Thin",
+    fontFamily: "Poppins-Regular",
   },
   responseBox: {
     color: colors.SECONDARY,

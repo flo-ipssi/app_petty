@@ -1,4 +1,5 @@
 import { categoriesTypes } from "@/utils/categories";
+import { Key } from "react";
 
 export interface UploadData {
   id: Key | null | undefined;

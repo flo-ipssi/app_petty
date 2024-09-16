@@ -12,13 +12,13 @@ import * as ImagePicker from "expo-image-picker";
 import { UploadData } from "@/@types/upload";
 import { DataURIToBlob } from "@/app/helpers/uploadMedia";
 
-export default function TabOneScreen() {
+export default function Apartment() {
   const { session, user } = useSession();
   const [description, setDescription] = useState("");
   const [modalPhotoVisible, setModalPhotoVisible] = useState(false);
   const [modalDeletePhotoVisible, setModalDeletePhotoVisible] = useState(false);
   const [imageToDelete, setImageToDelete] = useState(null);
-  const [gallery, setGallery] = useState(Array(6).fill(null));
+  const [gallery, setGallery] = useState(Array(6).fill(''));
   const fetchLatestResidence = async (): Promise<UploadData[]> => {
     const res = await fetch(client + `upload/residence`, {
       method: "GET",
@@ -73,8 +73,7 @@ export default function TabOneScreen() {
     }
     const result = await ImagePicker.launchCameraAsync();
     if (!result.canceled) {
-      // Faire quelque chose avec la photo prise
-      console.log("Photo prise:", result);
+      uploadFile(result);
     }
   };
 
@@ -95,45 +94,44 @@ export default function TabOneScreen() {
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
-    }).then((result: { canceled: any }) => {
+    }).then((result) => {
       if (!result.canceled) {
         uploadFile(result);
       }
     });
   };
 
-
   const uploadFile = async (uploadImg: { assets: any[] }) => {
     const assets = uploadImg.assets[0];
-    let split = assets.uri.split("/");
-    let type = split[1].split(";")[0];
 
-    // Change data to blob
-    const file = DataURIToBlob(assets.uri);
+    const filename = assets.uri.split("/").pop();
+
+    const match = /\.(\w+)$/.exec(filename || '');
+    const type = match ? `image/${match[1]}` : `image`;
 
     const formData = new FormData();
-    formData.append("upload", file);
-    formData.append("type", type);
-    formData.append("file", assets.uri);
+    formData.append("upload", {
+      uri: assets.uri,
+      name: filename,
+      type: type,
+    } as any);
 
     try {
-      const response = await fetch(client + `upload/create/Residence`, {
+      await fetch(client + `upload/create/Residence`, {
         method: "POST",
         body: formData,
         headers: {
-          Authorization: "Bearer " + session
+          'Content-Type': 'multipart/form-data', 
+          Authorization: "Bearer " + session,
         },
       }).then(() => {
         fetchLatestResidence();
       });
-
-      if (!response.ok) {
-      } else {
-      }
     } catch (error) {
-      let errorResponse = await error;
+      console.error("Erreur lors de l'upload:", error);
     }
   };
+
 
   const deleteFile = async () => {
     setModalDeletePhotoVisible(false);
@@ -165,6 +163,8 @@ export default function TabOneScreen() {
         <Text style={styles.intitule}>Photos</Text>
         <View style={styles.row}>
           {gallery.map((item: UploadData | null, index) => {
+            console.log(item);
+
             return (
               <View key={index}>
                 {item ? (

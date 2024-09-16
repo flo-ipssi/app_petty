@@ -25,7 +25,7 @@ interface Props { }
 const cities = ["paris", "lyon", "marseille", "toulouse", "nice"];
 
 const Account: FC<Props> = () => {
-  const { session, user, filtersData,setFiltersData, setReloadPets,signOut } = useSession();
+  const { session, user, filtersData, setFiltersData, setReloadPets, signOut } = useSession();
   const router = useRouter();
   const [profileImage, setProfileImage] = useState(
     user?.avatar ? user.avatar : "https://via.placeholder.com/200"
@@ -38,7 +38,7 @@ const Account: FC<Props> = () => {
     }));
   };
 
-  const setDistance = (value: number) => {   
+  const setDistance = (value: number) => {
     setFiltersData((prevState) => ({
       ...prevState,
       distance: value,
@@ -52,18 +52,18 @@ const Account: FC<Props> = () => {
     }));
   };
 
-  const uploadFile = async (uploadImg: { canceled?: false; assets: any; }) => {
+  const uploadFile = async (uploadImg: { canceled?: false; assets: any[] }) => {
     const assets = uploadImg.assets[0];
-    let split = assets.uri.split("/");
-    let type = split[1].split(";")[0];
-
-    // Change data to blob
-    const file = DataURIToBlob(assets.uri);
-
+    const filename = assets.uri.split("/").pop();
+    const match = /\.(\w+)$/.exec(filename || '');
+    const type = match ? `image/${match[1]}` : `image`;
     const formData = new FormData();
-    formData.append("upload", file);
-    formData.append("type", type);
-    formData.append("file", assets.uri);
+
+    formData.append("upload", {
+      uri: assets.uri,
+      name: filename,
+      type: type,
+    } as any);
 
     try {
       const response = await fetch(client + "upload/create/User", {
@@ -71,6 +71,7 @@ const Account: FC<Props> = () => {
         body: formData,
         headers: {
           Authorization: "Bearer " + session,
+          'Content-Type': 'multipart/form-data',
         },
       });
 
@@ -79,9 +80,7 @@ const Account: FC<Props> = () => {
         setProfileImage(data.result);
       }
     } catch (error) {
-      let errorResponse = await error;
-      console.log(errorResponse);
-
+      console.error("Erreur lors de l'upload de l'image :", error);
     }
   };
 
@@ -302,6 +301,9 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   profileImage: {
+    marginTop: 20,
+    borderWidth: 5,
+    borderColor: colors.SECONDARY_BORDER,
     width: 200,
     height: 200,
     borderRadius: 100,
