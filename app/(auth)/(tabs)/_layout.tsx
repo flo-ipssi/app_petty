@@ -82,7 +82,7 @@ export default function TabLayout() {
         name="(conversation)"
         options={{
           tabBarShowLabel: false,
-          title: "Conversations",
+          headerShown: false,
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons name="message" size={25} color={color} />
           ),

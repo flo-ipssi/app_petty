@@ -1,186 +1,206 @@
-import { useRoute } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { MessagesInStackParamList } from "@/@types/navigation";
-import moment from "moment";
-import React, { FC, useEffect, useState } from "react";
-import {
-  Button,
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
-import { Keys, getFromAsyncStorage } from "@/utils/asyncStorage";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { View, Text, Image, StyleSheet, Button, TextInput, FlatList } from "react-native";
+import { useLocalSearchParams } from "expo-router";
 import { useSession } from "@/app/ctx";
 import client from "@/app/api/client";
-import { useGlobalSearchParams, useLocalSearchParams } from "expo-router";
-type Props = NativeStackScreenProps<MessagesInStackParamList, "Conversation">;
+import moment from 'moment';
+type Message = {
+    owner: string;
+    text: string;
+    createdAt: string;
+};
 
-const Conversation: FC<Props> = ({ route }) => {
-  const dispatch = useDispatch();
-  const { user } = useSession;
-  const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState("");
-  const { conversationId, petInfos } = route.params;
+const Chat: React.FC = () => {
+    const { session, user } = useSession();
+    const { conversationId, petName, petPhoto } = useLocalSearchParams<{
+        id: string;
+        conversationId: string;
+        petName: string;
+        petPhoto?: string;
+    }>();
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [newMessage, setNewMessage] = useState<string>("");
 
-  const glob = useGlobalSearchParams();
-  const local = useLocalSearchParams();
-  console.log("Local:", local.id, "Global:", glob.id);
-  async function fetchMessages() {
-    try {
-      const token = await getFromAsyncStorage(Keys.AUTH_TOKEN);
-      if (!token) return;
-      const data = await fetch(client + `message`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          conversationId: conversationId,
-        }),
-      });
+    async function fetchMessages() {
+        try {
+            if (!session) return;
+            const data = await fetch(client + `message`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${session}`,
+                },
+                body: JSON.stringify({
+                    conversationId: conversationId,
+                }),
+            });
 
-      const res = await data.json();
+            const res = await data.json();
 
-      if (res.messages) {
-        setMessages(res.messages);
-      }
-    } catch (error) {
+            if (res.messages) {
+                setMessages(res.messages);
+            }
+        } catch (error) {
+        }
     }
-  }
-  async function sendMessage(message: string) {
-    try {
-      const token = await getFromAsyncStorage(Keys.AUTH_TOKEN);
-      if (!token) return;
-      await fetch(client + `message/send`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          messageText: message,
-          ownerId: user.id,
-          conversationId: conversationId,
-        }),
-      });
-    } catch (error) {
+    async function sendMessage(message: string) {
+        try {
+            if (!session) return;
+            if (!user) return;
+            await fetch(client + `message/send`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                    Authorization: `Bearer ${session}`,
+                },
+                body: JSON.stringify({
+                    messageText: message,
+                    ownerId: user.id,
+                    conversationId: conversationId,
+                }),
+            });
+        } catch (error) {
+        }
     }
-  }
 
-  const handleSendMessage = () => {
-    if (newMessage.trim() !== "") {
-      const updatedMessages = [
-        { text: newMessage, owner: user.id },
-        ...messages,
-      ];
-      setMessages(updatedMessages);
-      setNewMessage("");
-      sendMessage(newMessage);
-    }
-  };
+    const handleSendMessage = () => {
+        if (!user) return;
+        if (newMessage.trim() !== "") {
+            const updatedMessages: Message[] = [
+                { text: newMessage, owner: user.id, createdAt: new Date().toISOString() },
+                ...messages,
+            ];
+            setMessages(updatedMessages);
+            setNewMessage("");
+            sendMessage(newMessage);
+        }
+    };
+    
 
-  const formatMessageDate = (dateString: moment.MomentInput) => {
-    const timestamp = moment(dateString);
+    const formatMessageDate = (dateString: moment.MomentInput) => {
+        const timestamp = moment(dateString);
 
-    if (timestamp.isSame(moment(), "day")) {
-      return timestamp.format("HH:mm");
-    } else {
-      return timestamp.format("dd MMMM yyyy à HH:mm");
-    }
-  };
+        if (timestamp.isSame(moment(), "day")) {
+            return timestamp.format("HH:mm");
+        } else {
+            return timestamp.format("dd MMMM yyyy à HH:mm");
+        }
+    };
 
-  const renderItem = ({ item }) => {
-    const isMe = item.owner == user.id ? true : false;
+    const renderItem = ({ item }: { item: Message }) => {
+        if (!user) return null;
+        const isMe = item.owner === user.id;
+    
+        return (
+            <View
+                style={{
+                    flexDirection: isMe ? "row-reverse" : "row",
+                    flex: 1,
+                    marginVertical: 15,
+                }}
+            >
+                {!isMe && (
+                    <Image
+                        source={{ uri: petPhoto }}
+                        style={{
+                            width: 50,
+                            height: 50,
+                            borderRadius: 25,
+                            marginRight: 10,
+                            marginTop: 10,
+                        }}
+                    />
+                )}
+                <View
+                    style={{
+                        backgroundColor: isMe ? "#DCF8C6" : "#F0F0F0",
+                        alignSelf: isMe ? "flex-end" : "flex-start",
+                        borderRadius: 20,
+                        padding: 10,
+                        maxWidth: "100%",
+                    }}
+                >
+                    <Text style={{ fontSize: 16 }}>{item.text}</Text>
+                    <Text style={{ fontSize: 12, marginTop: 5, color: "#666" }}>
+                        {formatMessageDate(item.createdAt)}
+                    </Text>
+                </View>
+            </View>
+        );
+    };
+    
 
-    return (
-      <View
-        style={{
-          flexDirection: isMe ? "row-reverse" : "row",
-          flex: 1,
-          marginVertical: 15,
-        }}
-      >
-        {!isMe && (
-          <Image
-            source={{ uri: petInfos.photo[0] }}
-            style={{
-              width: 50,
-              height: 50,
-              borderRadius: 25,
-              marginRight: 10,
-              marginTop: 10,
-            }}
-          />
-        )}
-        <View
-          style={{
-            backgroundColor: isMe ? "#DCF8C6" : "#F0F0F0",
-            alignSelf: isMe ? "flex-end" : "flex-start",
-            borderRadius: 20,
-            padding: 10,
-            maxWidth: "100%",
-          }}
-        >
-          <Text style={{ fontSize: 16 }}>{item.text}</Text>
-          <Text style={{ fontSize: 12, marginTop: 5, color: "#666" }}>
-            {formatMessageDate(item.createdAt)}
-          </Text>
-        </View>
-      </View>
-    );
-  };
-
-  useEffect(() => {
-    fetchMessages();
-    if (conversationId) {
-      const intervalId = setInterval(() => {
+    useEffect(() => {        
         fetchMessages();
-      }, 5000);
+        if (conversationId) {
+            const intervalId = setInterval(() => {
+                fetchMessages();
+            }, 5000);
 
-      return () => clearInterval(intervalId);
-    }
-  }, [conversationId]);
+            return () => clearInterval(intervalId);
+        }
+    }, [conversationId]);
+    return (
 
-  return (
-    <View style={{ flex: 1, padding: 20, backgroundColor: "#FAFAFA" }}>
-      <FlatList
-        data={messages}
-        renderItem={renderItem}
-        keyExtractor={(item, index) => index.toString()}
-        // inverted // show the messages from the bottom to the top
-      />
-      <View
-        style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}
-      >
-        <TextInput
-          style={{
-            flex: 1,
-            borderWidth: 1,
-            borderColor: "#CCCCCC",
-            borderRadius: 30,
-            paddingHorizontal: 15,
-            paddingVertical: 10,
-            backgroundColor: "#FFFFFF",
-          }}
-          value={newMessage}
-          onChangeText={(text) => setNewMessage(text)}
-          placeholder="Saisissez votre message..."
-        />
-        <Button title="Envoyer" onPress={handleSendMessage} />
-      </View>
-    </View>
-  );
+        <View style={{ flex: 1, padding: 20, backgroundColor: "#FAFAFA" }}>
+            {renderItem ?
+                <FlatList
+                    data={messages}
+                    renderItem={renderItem}
+                    keyExtractor={(item, index) => index.toString()}
+                // inverted // show the messages from the bottom to the top
+                /> : null}
+            <View
+                style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}
+            >
+                <TextInput
+                    style={{
+                        flex: 1,
+                        borderWidth: 1,
+                        borderColor: "#CCCCCC",
+                        borderRadius: 30,
+                        paddingHorizontal: 15,
+                        paddingVertical: 10,
+                        backgroundColor: "#FFFFFF",
+                    }}
+                    value={newMessage}
+                    onChangeText={(text) => setNewMessage(text)}
+                    placeholder="Saisissez votre message..."
+                />
+                <Button title="Envoyer" onPress={handleSendMessage} />
+            </View>
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({
-  container: {},
+    container: {
+        flex: 1,
+        backgroundColor: "#FFF",
+        padding: 20,
+    },
+    header: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 20,
+    },
+    petImage: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        marginRight: 15,
+    },
+    petName: {
+        fontSize: 18,
+        fontWeight: "bold",
+    },
+    chatContainer: {
+        flex: 1,
+        backgroundColor: "#f0f0f0",
+        borderRadius: 10,
+        padding: 20,
+    },
 });
 
-export default Conversation;
+export default Chat;

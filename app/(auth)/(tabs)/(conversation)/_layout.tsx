@@ -1,6 +1,8 @@
-import { Stack } from 'expo-router';
+import { Stack, useGlobalSearchParams } from 'expo-router';
 
 export default function Layout() {
+    const { petName } = useGlobalSearchParams();
+    
     return (
         <Stack>
             <Stack.Screen
@@ -12,7 +14,7 @@ export default function Layout() {
             <Stack.Screen
                 name="chat/[id]"
                 options={{
-                    title: "Chat"
+                    title: petName as string || "Conversation"
                 }}
             />
         </Stack>

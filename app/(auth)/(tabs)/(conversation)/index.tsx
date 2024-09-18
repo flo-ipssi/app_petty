@@ -7,63 +7,83 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { useRouter } from "expo-router"; // Hook for navigation
 import colors from "@/utils/colors";
-import { Fonts } from "@/utils/fonts";
-import { Keys, getFromAsyncStorage } from "@/utils/asyncStorage";
 import ConversationItem from "@/components/ConversationItem";
 import client from "@/app/api/client";
 import RessourceNotAvailable from "@/components/ui/RessourceNotAvailable";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useSession } from "@/app/ctx";
 
-const ConversationList = ({ }) => {
-    const [haveNewMessages, setHaveNewMessages] = useState(false);
-    const [conversations, setConversations] = useState([]);
+interface Conversation {
+    _id: string;
+    petInfo: { name: string }[];
+    petName: string;
+    petUploads: { profil: boolean; file: { url: string } }[];
+    newMessage?: boolean;
+}
+
+const ConversationList: React.FC = () => {
+    const { session } = useSession();
+    const [haveNewMessages, setHaveNewMessages] = useState<boolean>(false);
+    const [conversations, setConversations] = useState<Conversation[]>([]);
+    const router = useRouter();
 
     const handleNewPress = () => {
         setHaveNewMessages(true);
     };
 
-    const renderItem = ({ item }) => {
+    const handleConversationPress = (conversationId: string, petInfos: { name: string; photo: string }) => {
+        router.push({
+            pathname: `/chat/${conversationId}`,
+            params: {
+                petName: petInfos.name,
+                petPhoto: petInfos.photo,
+                conversationId: conversationId,
+            },
+        });
+    };
+
+    const renderItem = ({ item }: { item: Conversation }) => {
         if (item.newMessage) {
             handleNewPress();
         }
 
         const photo = item.petUploads
-            .filter((item: { profil: boolean }) => item.profil == true)
-            .map((item: { file: { url: any; }; }) => item.file.url);
+            .filter((upload) => upload.profil)
+            .map((upload) => upload.file.url);
+        
+        const petInfos = {
+            name: item.petInfo[0].name,
+            photo: photo[0] || '', 
+        };
 
-        const petInfos = { infos: item.petInfo[0], photo }
         return (
             <ConversationItem
                 data={item}
                 idChat={item._id}
-                onClick={() => console.log('ok')
-                
-                    // navigation.navigate("Conversation", { conversationId: item._id, petInfos })
-                }
+                onClick={() => handleConversationPress(item._id, petInfos)}
             />
         );
     };
 
     async function getConversationList() {
         try {
-            const token = await getFromAsyncStorage(Keys.AUTH_TOKEN);
-            if (!token) return;
-            const data = await fetch(client + `conversation/match`, {
+            const response = await fetch(client + `conversation/match`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    Authorization: `Bearer ${token}`,
+                    Authorization: `Bearer ${session}`,
                 },
             });
 
-            const res = await data.json();
+            const res = await response.json();
 
             if (res.conversations) {
                 setConversations(res.conversations);
             }
         } catch (error) {
+            console.error("Error fetching conversations:", error);
         }
     }
 
