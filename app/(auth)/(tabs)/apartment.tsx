@@ -155,15 +155,13 @@ export default function Apartment() {
     }
     fetchLatestResidence();
   }, []);
-  
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.divContainer}>
         <Text style={styles.intitule}>Photos</Text>
         <View style={styles.row}>
           {gallery.map((item: UploadData | null, index) => {
-            console.log(item);
-
             return (
               <View key={index}>
                 {item ? (

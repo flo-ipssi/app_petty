@@ -43,11 +43,11 @@ const Chat: React.FC = () => {
         } catch (error) {
         }
     }
+
     async function sendMessage(message: string) {
         try {
-            if (!session) return;
-            if (!user) return;
-            await fetch(client + `message/send`, {
+            if (!session || !user) return;
+            const response = await fetch(client + `message/send`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -60,24 +60,33 @@ const Chat: React.FC = () => {
                     conversationId: conversationId,
                 }),
             });
+            return response;
         } catch (error) {
+            console.error("Error sending message:", error);
+            throw error;
         }
     }
 
-    const handleSendMessage = () => {
-        if (!user) return;
-        if (newMessage.trim() !== "") {
-            const updatedMessages: Message[] = [
-                { text: newMessage, owner: user.id, createdAt: new Date().toISOString() },
-                ...messages,
-            ];
-            setMessages(updatedMessages);
-            setNewMessage("");
-            sendMessage(newMessage);
+    const handleSendMessage = async () => {
+        if (!user || newMessage.trim() === "") return;
+    
+        const tempMessage = { text: newMessage, owner: user.id, createdAt: new Date().toISOString() };
+        setMessages([tempMessage, ...messages]);
+        setNewMessage("");
+    
+        try {
+            const response = await sendMessage(newMessage);
+    
+            if (response && response.ok) {
+                fetchMessages();
+            } else {
+                setMessages(messages);
+            }
+        } catch (error) {
+            setMessages(messages);
         }
     };
     
-
     const formatMessageDate = (dateString: moment.MomentInput) => {
         const timestamp = moment(dateString);
 
@@ -91,7 +100,7 @@ const Chat: React.FC = () => {
     const renderItem = ({ item }: { item: Message }) => {
         if (!user) return null;
         const isMe = item.owner === user.id;
-    
+
         return (
             <View
                 style={{
@@ -129,9 +138,9 @@ const Chat: React.FC = () => {
             </View>
         );
     };
-    
 
-    useEffect(() => {        
+
+    useEffect(() => {
         fetchMessages();
         if (conversationId) {
             const intervalId = setInterval(() => {

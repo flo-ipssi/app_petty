@@ -30,6 +30,19 @@ const ConversationItem: FC<Props> = ({ data, onClick, idChat }) => {
                         }}
                     >
                         {data.petInfo[0].name}
+                        {!data.messages[0] ? (
+                            <View
+                                style={{
+                                    backgroundColor: colors.DARK,
+                                    width: 7,
+                                    height: 7,
+                                    borderRadius: 5,
+                                    position: "absolute",
+                                    top: 12,
+                                    right: -15,
+                                }}
+                            ></View>
+                        ) : null}
                     </Text>
                     <Text
                         style={{
@@ -41,19 +54,7 @@ const ConversationItem: FC<Props> = ({ data, onClick, idChat }) => {
                     </Text>
                 </View>
                 {/* {!data.messages[0].is_Seen ? ( */}
-                {!data.messages[0] ? (
-                    <View
-                        style={{
-                            backgroundColor: colors.DARK,
-                            width: 7,
-                            height: 7,
-                            borderRadius: 5,
-                            position: "absolute",
-                            top: 20,
-                            right: -10,
-                        }}
-                    ></View>
-                ) : null}
+
             </View>
         </Pressable>
     );
@@ -61,11 +62,8 @@ const ConversationItem: FC<Props> = ({ data, onClick, idChat }) => {
 
 const styles = StyleSheet.create({
     container: {},
-
     row: {
         marginTop: 10,
-        borderTopWidth: 1,
-        borderTopColor: colors.GRAY,
         width: "80%",
         alignSelf: "center",
     },

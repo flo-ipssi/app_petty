@@ -154,7 +154,7 @@ const Account: FC<Props> = () => {
         body: JSON.stringify(filtersData),
       });
     } catch (error) {
-      console.log("Filter error: " + error);
+      console.error("Filter error: " + error);
     }
     setReloadPets(true)
   }

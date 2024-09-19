@@ -141,14 +141,19 @@ const styles = StyleSheet.create({
         fontFamily: "Poppins-Regular",
     },
     header: {
+        borderBottomWidth: 1,
+        borderBottomColor: colors.GRAY,
         flexDirection: "row",
         justifyContent: "center",
         alignContent: "center",
-        width: "100%",
+        marginHorizontal:'auto',
+        width: "80%",
+        marginTop: 20,  
     },
     boutons: {
         paddingHorizontal: 30,
-        paddingVertical: 15,
+        paddingVertical: 5,
+        marginVertical:10
     },
 });
 
