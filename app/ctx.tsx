@@ -3,7 +3,6 @@ import { useStorageState } from "./useStorageState";
 import axios from 'axios';
 import client from "@/app/api/client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { router, useRouter } from "expo-router";
 
 type User = {
   id: string;

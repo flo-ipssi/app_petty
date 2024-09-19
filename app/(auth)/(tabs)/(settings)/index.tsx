@@ -52,18 +52,23 @@ const Account: FC<Props> = () => {
     }));
   };
 
-  const uploadFile = async (uploadImg: { canceled?: false; assets: any[] }) => {
-    const assets = uploadImg.assets[0];
-    const filename = assets.uri.split("/").pop();
-    const match = /\.(\w+)$/.exec(filename || '');
-    const type = match ? `image/${match[1]}` : `image`;
-    const formData = new FormData();
+  const uploadFile = async (uploadImg: { canceled?: false; assets: { uri: string, base64: string }[] }) => {
+    if (!uploadImg || uploadImg.canceled || !uploadImg.assets || uploadImg.assets.length === 0) {
+      console.error("Aucune image n'a été sélectionnée.");
+      return;
+    }
 
-    formData.append("upload", {
-      uri: assets.uri,
-      name: filename,
-      type: type,
-    } as any);
+    const assets = uploadImg.assets[0];
+    let split = assets.uri.split("/");
+    let type = split[1].split(";")[0];
+
+    // Change data to blob
+    const file = DataURIToBlob(assets.uri);
+
+    const formData = new FormData();
+    formData.append("upload", file);
+    formData.append("type", type);
+    formData.append("file", assets.uri);
 
     try {
       const response = await fetch(client + "upload/create/User", {
@@ -71,18 +76,21 @@ const Account: FC<Props> = () => {
         body: formData,
         headers: {
           Authorization: "Bearer " + session,
-          'Content-Type': 'multipart/form-data',
         },
       });
 
       if (response.ok) {
         const data = await response.json();
         setProfileImage(data.result);
+      } else {
+        console.error("Erreur lors de l'upload, code de statut :", response.status);
       }
     } catch (error) {
       console.error("Erreur lors de l'upload de l'image :", error);
     }
   };
+
+
 
   const selectImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({

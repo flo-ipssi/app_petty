@@ -1,10 +1,9 @@
-import { Alert, Button, ScrollView, StyleSheet, TextInput } from "react-native";
+import { Alert, ScrollView, StyleSheet, TextInput } from "react-native";
 import _ from "lodash";
-import EditScreenInfo from "@/components/EditScreenInfo";
 import { Text, View } from "@/components/Themed";
 import { useSession } from "../../ctx";
 import colors from "@/utils/colors";
-import { Key, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import client from "@/app/api/client";
 import AppImagePicker from "@/components/ui/AppImagePicker";
 import CustomModal from "@/components/CustomModal";
@@ -94,34 +93,33 @@ export default function Apartment() {
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
-    }).then((result) => {
-      if (!result.canceled) {
-        uploadFile(result);
-      }
-    });
+    })
+    
+    if (!result.canceled) {
+      uploadFile(result);
+    }
   };
 
   const uploadFile = async (uploadImg: { assets: any[] }) => {
+  
     const assets = uploadImg.assets[0];
+    let split = assets.uri.split("/");
+    let type = split[1].split(";")[0];
 
-    const filename = assets.uri.split("/").pop();
-
-    const match = /\.(\w+)$/.exec(filename || '');
-    const type = match ? `image/${match[1]}` : `image`;
+    // Change data to blob
+    const file = DataURIToBlob(assets.uri);
 
     const formData = new FormData();
-    formData.append("upload", {
-      uri: assets.uri,
-      name: filename,
-      type: type,
-    } as any);
+    formData.append("upload", file);
+    formData.append("type", type);
+    formData.append("file", assets.uri);
+
 
     try {
       await fetch(client + `upload/create/Residence`, {
         method: "POST",
         body: formData,
         headers: {
-          'Content-Type': 'multipart/form-data', 
           Authorization: "Bearer " + session,
         },
       }).then(() => {
@@ -157,6 +155,7 @@ export default function Apartment() {
     }
     fetchLatestResidence();
   }, []);
+  
   return (
     <ScrollView style={styles.container}>
       <View style={styles.divContainer}>
