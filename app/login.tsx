@@ -1,7 +1,7 @@
 import { Button, Pressable, StyleSheet, TextInput } from "react-native";
 import { Text, View } from "@/components/Themed";
 import { useSession } from "./ctx";
-import { Link, router, useNavigation } from "expo-router";
+import { Link, router, useNavigation, useRouter } from "expo-router";
 import Form from "@/components/Form";
 import AuthFormConainer from "@/components/AuthFormConainer";
 import AuthInputField from "@/components/AuthInputField";
@@ -34,9 +34,9 @@ interface SignInUserInfo {
 
 
 export default function Login() {
-  const { signIn, errorMessage, session, user } = useSession();
-  const [secureEntry, setSecureEntry] = useState(true);
-  const navigation = useNavigation();
+  const { signIn, errorMessage, session } = useSession();
+  const [secureEntry, setSecureEntry] = useState(true);  
+  const router = useRouter();
 
   const togglePassword = () => {
     setSecureEntry(!secureEntry)

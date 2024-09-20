@@ -3,6 +3,7 @@ import { useStorageState } from "./useStorageState";
 import axios from 'axios';
 import client from "@/app/api/client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import LoaderPage from "@/components/LoaderPage";
 
 type User = {
   id: string;
@@ -21,7 +22,6 @@ type Filters = {
   gender: string[];
   ageMin: number;
   ageMax: number;
-
   isCat: boolean;
   isDog: boolean;
   isBird: boolean;
@@ -48,7 +48,7 @@ const AuthContext = React.createContext<{
   session: null,
   errorMessage: null,
   user: null,
-  setUser: () => null, 
+  setUser: () => null,
   setFiltersData: () => null,
   reloadPets: false,
   setReloadPets: () => null,
@@ -98,6 +98,8 @@ export function SessionProvider(props: React.PropsWithChildren) {
     distance: 1,
   });
 
+  const [isAppReady, setIsAppReady] = useState(false); // Nouvel état pour gérer le délai de chargement
+
   // Load session and user
   useEffect(() => {
     const loadSession = async () => {
@@ -112,6 +114,12 @@ export function SessionProvider(props: React.PropsWithChildren) {
         if (storedUser) {
           setUser(JSON.parse(storedUser));
         }
+
+        // Simuler un délai de chargement de 2 secondes
+        setTimeout(() => {
+          setIsAppReady(true);
+        }, 2000);
+
       } catch (error) {
         console.error('Failed to load session or user from storage:', error);
       }
@@ -136,14 +144,18 @@ export function SessionProvider(props: React.PropsWithChildren) {
           if (!response.ok) {
             signOut(); 
           } else {
-            const data = await response.json();
-            setUser(data.profile);
+            const data = await response.json();            
+            const token = data.token;
+            const userData = data.profile;
+            
+            await AsyncStorage.setItem('session', token);
+            await AsyncStorage.setItem('user', JSON.stringify(userData));
           }
         } catch (error) {
           console.error('Error verifying session:', error);
           signOut();
         }
-      }else{
+      } else {
         signOut();
       }
     };
@@ -156,14 +168,14 @@ export function SessionProvider(props: React.PropsWithChildren) {
     const loadFilters = async () => {
       if (user && session) {
         try {
-          const reponse = await fetch(client + "filter/update-filters", {
-            method: "POST",
+          const response = await fetch(client + "filter/get", {
+            method: "GET",
             headers: {
               Authorization: `Bearer ${session}`,
             },
           });
 
-          const data = await reponse.json();
+          const data = await response.json();
           setFiltersData(data.filter);
         } catch (error) {
           console.error('Failed to load filters:', error);
@@ -175,26 +187,32 @@ export function SessionProvider(props: React.PropsWithChildren) {
 
   const signOut = async () => {
     try {
-      if (!session) return;
-      await fetch(client + "auth/log-out?fromAll=yes",
-        {
+      if (session) {
+        await fetch(client + "auth/log-out?fromAll=yes", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*",
             Authorization: `Bearer ${session}`,
           },
-        }
-      )
+        });
+      }
     } catch (error) {
       console.log(error);
     }
     setUser(null);
     setSession(null);
     await AsyncStorage.removeItem('user');
-    console.log('User logged out');
-    // router.navigate("login")
   };
+
+  // Affichage de l'écran de chargement pendant les 2 secondes
+  if (!isAppReady) {
+    return (
+      // Tu peux ici afficher un écran de chargement ou un simple indicateur
+      // <Text>Chargement...</Text>
+      <LoaderPage />
+    );
+  }
 
   return (
     <AuthContext.Provider
@@ -207,7 +225,7 @@ export function SessionProvider(props: React.PropsWithChildren) {
             });
             const token = response.data.token;
             const userData = response.data.profile;
-            setSession(session);
+            setSession(token);
             setUser(userData);
 
             await AsyncStorage.setItem('session', token);
@@ -217,7 +235,6 @@ export function SessionProvider(props: React.PropsWithChildren) {
             console.error("Login failed:", error);
             setErrorMessage("Failed to sign in. Please check your credentials.");
           }
-
         },
         signOut,
         session,
