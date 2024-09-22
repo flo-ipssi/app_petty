@@ -6,7 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import LoaderPage from "@/components/LoaderPage";
 
 type User = {
-  id: string;
+  _id: string;
   name: string;
   firstname: string;
   fullname: string;
@@ -98,7 +98,7 @@ export function SessionProvider(props: React.PropsWithChildren) {
     distance: 1,
   });
 
-  const [isAppReady, setIsAppReady] = useState(false); // Nouvel état pour gérer le délai de chargement
+  const [isAppReady, setIsAppReady] = useState(false);
 
   // Load session and user
   useEffect(() => {
@@ -115,10 +115,9 @@ export function SessionProvider(props: React.PropsWithChildren) {
           setUser(JSON.parse(storedUser));
         }
 
-        // Simuler un délai de chargement de 2 secondes
         setTimeout(() => {
           setIsAppReady(true);
-        }, 2000);
+        }, 1000);
 
       } catch (error) {
         console.error('Failed to load session or user from storage:', error);
@@ -144,12 +143,14 @@ export function SessionProvider(props: React.PropsWithChildren) {
           if (!response.ok) {
             signOut(); 
           } else {
-            const data = await response.json();            
-            const token = data.token;
+            const data = await response.json();
             const userData = data.profile;
-            
-            await AsyncStorage.setItem('session', token);
-            await AsyncStorage.setItem('user', JSON.stringify(userData));
+            const token = session;
+
+            if (token && userData) {
+              await AsyncStorage.setItem('session', token);
+              await AsyncStorage.setItem('user', JSON.stringify(userData));
+            }
           }
         } catch (error) {
           console.error('Error verifying session:', error);
@@ -192,7 +193,6 @@ export function SessionProvider(props: React.PropsWithChildren) {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
             Authorization: `Bearer ${session}`,
           },
         });
@@ -200,18 +200,16 @@ export function SessionProvider(props: React.PropsWithChildren) {
     } catch (error) {
       console.log(error);
     }
+    
+    await AsyncStorage.removeItem('session');
+    await AsyncStorage.removeItem('user');
+    
     setUser(null);
     setSession(null);
-    await AsyncStorage.removeItem('user');
   };
 
-  // Affichage de l'écran de chargement pendant les 2 secondes
   if (!isAppReady) {
-    return (
-      // Tu peux ici afficher un écran de chargement ou un simple indicateur
-      // <Text>Chargement...</Text>
-      <LoaderPage />
-    );
+    return <LoaderPage />;
   }
 
   return (
@@ -225,12 +223,14 @@ export function SessionProvider(props: React.PropsWithChildren) {
             });
             const token = response.data.token;
             const userData = response.data.profile;
-            setSession(token);
-            setUser(userData);
 
-            await AsyncStorage.setItem('session', token);
-            await AsyncStorage.setItem('user', JSON.stringify(userData));
+            if (token && userData) {
+              setSession(token);
+              setUser(userData);
 
+              await AsyncStorage.setItem('session', token);
+              await AsyncStorage.setItem('user', JSON.stringify(userData));
+            }
           } catch (error) {
             console.error("Login failed:", error);
             setErrorMessage("Failed to sign in. Please check your credentials.");

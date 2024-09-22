@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
     FlatList,
+    SafeAreaView,
     ScrollView,
     StyleSheet,
     Text,
@@ -52,12 +53,14 @@ const ConversationList: React.FC = () => {
         const photo = item.petUploads
             .filter((upload) => upload.profil)
             .map((upload) => upload.file.url);
-        
+
         const petInfos = {
             name: item.petInfo[0].name,
-            photo: photo[0] || '', 
+            photo: photo[0] || '',
         };
 
+        console.log(petInfos.photo);
+        
         return (
             <ConversationItem
                 data={item}
@@ -92,7 +95,7 @@ const ConversationList: React.FC = () => {
     }, []);
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity style={styles.boutons}>
                     <Text>Tous les messages</Text>
@@ -110,27 +113,30 @@ const ConversationList: React.FC = () => {
                                 top: 15,
                                 left: 20,
                             }}
-                        ></View>
+                        />
                     ) : null}
                 </TouchableOpacity>
             </View>
-            <ScrollView showsHorizontalScrollIndicator={false}>
-                {conversations?.length > 0 ? (
-                    <FlatList
-                        data={conversations}
-                        renderItem={renderItem}
-                        keyExtractor={(item) => item._id.toString()}
-                    />
-                ) : <RessourceNotAvailable
+
+            {conversations?.length > 0 ? (
+                <FlatList
+                    data={conversations}
+                    renderItem={renderItem}
+                    keyExtractor={(item) => item._id.toString()}
+                    showsVerticalScrollIndicator={false}
+                />
+            ) : (
+                <RessourceNotAvailable
                     title="Aucuns match"
-                    icon={<MaterialCommunityIcons 
+                    icon={<MaterialCommunityIcons
                         name="emoticon-sad-outline"
                         size={45}
                         color={colors.DARK} />}
                     message="Lorsque tu matcheras avec les propriétaires, tes matchs seront affichés ici."
-                />}
-            </ScrollView>
-        </View>
+                />
+            )}
+        </SafeAreaView>
+
     );
 };
 
@@ -146,14 +152,14 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "center",
         alignContent: "center",
-        marginHorizontal:'auto',
+        marginHorizontal: 'auto',
         width: "80%",
-        marginTop: 20,  
+        marginTop: 20,
     },
     boutons: {
         paddingHorizontal: 30,
         paddingVertical: 5,
-        marginVertical:10
+        marginVertical: 10
     },
 });
 

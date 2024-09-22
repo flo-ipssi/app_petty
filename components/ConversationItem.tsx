@@ -2,7 +2,6 @@ import React, { FC } from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import colors from "@/utils/colors";
 import { Fonts } from "@/utils/fonts";
-import { Link } from "expo-router";
 
 interface Props {
     data: any;
@@ -19,7 +18,7 @@ const ConversationItem: FC<Props> = ({ data, onClick, idChat }) => {
         <Pressable style={styles.row} onPress={onClick}>
             <View style={{ flexDirection: "row", padding: 10 }}>
                 <Image
-                    source={petProfil[0]}
+                    source={{ uri: petProfil[0] }}
                     style={{ width: 50, height: 50, borderRadius: 25 }}
                 />
                 <View style={{ marginLeft: 25 }}>

@@ -45,6 +45,7 @@ const Chat: React.FC = () => {
     }
 
     async function sendMessage(message: string) {
+        
         try {
             if (!session || !user) return;
             const response = await fetch(client + `message/send`, {
@@ -56,7 +57,7 @@ const Chat: React.FC = () => {
                 },
                 body: JSON.stringify({
                     messageText: message,
-                    ownerId: user.id,
+                    ownerId: user._id,
                     conversationId: conversationId,
                 }),
             });

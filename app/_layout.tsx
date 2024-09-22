@@ -21,6 +21,7 @@ export default function RootLayout() {
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
     'Poppins-Thin': require('../assets/fonts/Poppins-Thin.ttf'),
     'Poppins-Regular': require('../assets/fonts/Poppins-Regular.ttf'),
+    'Poppins_Regular': require('../assets/fonts/Poppins-Regular.ttf'),
     'Poppins-SemiBold': require('../assets/fonts/Poppins-SemiBold.ttf'),
     'Poppins_Bold': require('../assets/fonts/Poppins-Bold.ttf'),
     ...FontAwesome.font,

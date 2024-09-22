@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "expo-router-study",
-    "slug": "expo-router-study",
+    "name": "petty",
+    "slug": "petty",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "petty",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",

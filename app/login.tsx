@@ -9,42 +9,38 @@ import PassewordVisibilityIcon from "@/components/ui/PassewordVisibilityIcon";
 import SubmitBtn from "@/components/SubmitBtn";
 import AppLink from "@/components/ui/AppLink";
 import { useEffect, useState } from "react";
-import * as yup from 'yup';
+import * as yup from "yup";
 import colors from "@/utils/colors";
-
 
 // Schema de validation
 const signInSchema = yup.object().shape({
-  email: yup.string().trim().email().required('Email is required!'),
-  password: yup.string().trim().min(8)
-    .required('Password is required!'),
+  email: yup.string().trim().email().required("Email is required!"),
+  password: yup.string().trim().min(8).required("Password is required!"),
 });
-interface Props { }
+interface Props {}
 
 const initialValues = {
-  email: '',
-  password: '',
-
+  email: "",
+  password: "",
 };
 
 interface SignInUserInfo {
   email: string;
   password: string;
-};
-
+}
 
 export default function Login() {
   const { signIn, errorMessage, session } = useSession();
-  const [secureEntry, setSecureEntry] = useState(true);  
+  const [secureEntry, setSecureEntry] = useState(true);
   const router = useRouter();
 
   const togglePassword = () => {
-    setSecureEntry(!secureEntry)
+    setSecureEntry(!secureEntry);
   };
 
   const linkHeading = () => {
     // navigation.navigate('SignUp')
-  }
+  };
 
   const handleLogin = (values: SignInUserInfo) => {
     signIn(values.email, values.password);
@@ -52,25 +48,25 @@ export default function Login() {
 
   useEffect(() => {
     if (session) {
-      router.replace('/');
+      router.replace("/");
     }
   }, [session]);
 
   return (
-
     <Form
       onSubmit={handleLogin}
       initialValues={initialValues}
-      validationSchema={signInSchema}>
+      validationSchema={signInSchema}
+    >
       <AuthFormConainer
-        heading='Connexion'
-        subHeading='Pas encore inscrit ? Inscription'
-      // linkSubHeading={linkHeading}
+        heading="Connexion"
+        subHeading="Pas encore inscrit ? Inscription"
+        // linkSubHeading={linkHeading}
       >
         <View style={styles.formContainer}>
           <Link href="/SignUp" asChild>
             <Pressable>
-              <Text style={styles.link} >Pas encore inscrit ? Inscription</Text>
+              <Text style={styles.link}>Pas encore inscrit ? Inscription</Text>
             </Pressable>
           </Link>
           <AuthInputField
@@ -90,36 +86,17 @@ export default function Login() {
             rightIcon={<PassewordVisibilityIcon privateIcon={secureEntry} />}
             onRightIconPress={togglePassword}
           />
-          {errorMessage && <Text style={{ color: 'red' }}>{errorMessage}</Text>}
+          {errorMessage && <Text style={{ color: "red" }}>{errorMessage}</Text>}
           <SubmitBtn title={"Sign in".toLocaleUpperCase()} />
 
           <View style={styles.linkContainer}>
             <Link href="/LostPassword">
-              <AppLink title='Mot de passe oublié ?' />
+              <AppLink title="Mot de passe oublié ?" />
             </Link>
           </View>
         </View>
       </AuthFormConainer>
     </Form>
-    // <View style={styles.container}>
-    //   <Text style={styles.title}>Welcome! 🌈 </Text>
-    //   <Text style={styles.paragraph}>
-    //     This is a simple repo that emulates a login authentication workflow
-    //     using Expo Router, focused on the navigation aspect.
-    //   </Text>
-    //   <View
-    //     style={styles.separator}
-    //     lightColor="#eee"
-    //     darkColor="rgba(255,255,255,0.1)"
-    //   />
-    //   <TextInput placeholder="Username(not required)" style={styles.input} />
-    //   <TextInput
-    //     placeholder="Password(not required)"
-    //     secureTextEntry
-    //     style={styles.input}
-    //   />
-    //   <Button title="Login" onPress={handleLogin} />
-    // </View>
   );
 }
 
@@ -153,8 +130,9 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   formContainer: {
-    width: '100%',
-    paddingHorizontal: 30
+    backgroundColor: "transparent",
+    width: "100%",
+    paddingHorizontal: 30,
   },
   marginBottom: {
     marginBottom: 10,
@@ -166,9 +144,10 @@ const styles = StyleSheet.create({
     color: colors.SECONDARY,
   },
   linkContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 4
-  }
+    backgroundColor: "transparent",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 4,
+  },
 });

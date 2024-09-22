@@ -4,7 +4,7 @@ import { Image, ImageBackground, StyleSheet, Text, View } from "react-native";
 
 import colors from "@/utils/colors";
 import AppLink from "./ui/AppLink";
-import image from "@/assets/background.png";
+import image from "../assets/background.png";
 interface Props {
     children?: ReactNode;
     heading?: string;
@@ -13,29 +13,31 @@ interface Props {
 }
 const AuthFormConainer: FC<Props> = (props) => {
     return (
-        // <ImageBackground source={image} resizeMode="cover" style={styles.image}>
-        <View style={styles.container}>
-            <View style={styles.headerContainer}>
-                <Image
-                    style={{ width: 230, height: 230 }}
-                    source={require("../assets/logos/original.png")}
-                />
-                <Text style={styles.heading}>{props.heading}</Text>
-                {/* <View style={styles.subHeading}>
+        <ImageBackground source={image} resizeMode="cover"
+            style={[styles.image, { ...StyleSheet.absoluteFillObject, }]
+            }>
+            <View style={styles.container}>
+                <View style={styles.headerContainer}>
+                    <Image
+                        style={{ width: 230, height: 230 }}
+                        source={require("../assets/logos/original.png")}
+                    />
+                    <Text style={styles.heading}>{props.heading}</Text>
+                    {/* <View style={styles.subHeading}>
                     <AppLink title={props.subHeading} onPress={props.linkSubHeading} />
                 </View> */}
-            </View>
+                </View>
 
-            {props.children}
-        </View>
-        // </ImageBackground>
+                {props.children}
+            </View>
+        </ImageBackground>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.INACTIVE_CONTRAST,
+        // backgroundColor: colors.INACTIVE_CONTRAST,
         alignItems: "center",
         justifyContent: "center",
     },

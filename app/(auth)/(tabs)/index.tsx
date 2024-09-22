@@ -1,4 +1,4 @@
-import { Animated, Dimensions, PanResponder, StyleSheet } from "react-native";
+import { Animated, Dimensions, PanResponder, StyleSheet, ActivityIndicator } from "react-native";
 import { View } from "@/components/Themed";
 import { useSession } from "../../ctx";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -8,7 +8,6 @@ import SwipeButtonsContainer from "@/components/SwipeButtonsContainer";
 import { fetchPets, likeChoice } from "@/app/api/apiService";
 import { useRouter } from "expo-router";
 import RessourceNotAvailable from "@/components/ui/RessourceNotAvailable";
-import client from "@/app/api/client";
 
 interface SlideData {
   file: {
@@ -36,6 +35,7 @@ export default function Apartment() {
   const router = useRouter();
   const [pets, setPets] = useState<Pet[]>([]);
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true); // Ajout de l'état de chargement
   const limit = 10;
   const swipe = useRef(new Animated.ValueXY()).current;
   const titleSign = useRef(new Animated.Value(1)).current;
@@ -47,7 +47,7 @@ export default function Apartment() {
     swipe.setValue({ x: 0, y: 0 });
   }, [swipe]);
 
-  // handle user choice (left or rightt)
+  // handle user choice (left or right)
   const handleChoice = useCallback(
     (direction: number) => {
       Animated.timing(swipe.x, {
@@ -58,7 +58,6 @@ export default function Apartment() {
     },
     [removeTopCard, swipe.x]
   );
-
 
   useEffect(() => {
     if (reloadPets) {
@@ -71,12 +70,18 @@ export default function Apartment() {
     const loadPets = async () => {
       try {
         if (session) {
+          setLoading(true); // Commence à charger
+          
           const newPets = await fetchPets(page, limit, session);
-
-          setPets((prevPets) => [...prevPets, ...newPets]);
+          
+          setTimeout(() => { // Simule un délai d'une seconde
+            setPets((prevPets) => [...prevPets, ...newPets]);
+            setLoading(false); // Fin du chargement
+          }, 1000);
         }
       } catch (error) {
         console.error("Erreur lors du chargement des animaux :", error);
+        setLoading(false); // En cas d'erreur, fin du chargement
       }
       setReloadPets(false);
     };
@@ -85,16 +90,18 @@ export default function Apartment() {
   }, [page, reloadPets, session]);
 
   useEffect(() => {
-    if (pets.length === 0) {
+    if (pets.length === 0 && !loading) {
       setPage((prevPage) => prevPage + 1);
     }
-  }, [pets.length]);
+  }, [pets.length, loading]);
 
   return (
     <View style={styles.container}>
       <StatusBar hidden={true} />
 
-      {pets.length > 0 ? (
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" /> 
+      ) : pets.length > 0 ? (
         pets
           .map(
             (
@@ -119,7 +126,6 @@ export default function Apartment() {
                 onMoveShouldSetPanResponder: (_, { dx, dy }) => {
                   return Math.abs(dx) > 10 || Math.abs(dy) > 10;
                 },
-                // onMoveShouldSetPanResponder: () => isFirst,
                 onPanResponderMove: (_, { dx, dy, y0 }) => {
                   swipe.setValue({ x: dx, y: dy });
                   titleSign.setValue(y0 > height / 2 ? 1 : -1);
