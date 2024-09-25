@@ -4,9 +4,10 @@ import axios from 'axios';
 import client from "@/app/api/client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LoaderPage from "@/components/LoaderPage";
+import { disconnectSocket, initSocket } from "./helpers/socket";
 
 type User = {
-  _id: string;
+  id: string;
   name: string;
   firstname: string;
   fullname: string;
@@ -150,6 +151,7 @@ export function SessionProvider(props: React.PropsWithChildren) {
             if (token && userData) {
               await AsyncStorage.setItem('session', token);
               await AsyncStorage.setItem('user', JSON.stringify(userData));
+              await initSocket();
             }
           }
         } catch (error) {
@@ -162,6 +164,10 @@ export function SessionProvider(props: React.PropsWithChildren) {
     };
 
     checkSession();
+    return () => {
+      // Déconnecter le socket lors du démontage ou de la déconnexion
+      disconnectSocket();
+    };
   }, [session]);
 
   // Filters

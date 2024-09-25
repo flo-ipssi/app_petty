@@ -52,7 +52,7 @@ const Account: FC<Props> = () => {
     }));
   };
 
-  const uploadFile = async (uploadImg: { canceled?: false; assets: { uri: string, base64: string }[] }) => {
+  const uploadFile = async (uploadImg : any) => {
     if (!uploadImg || uploadImg.canceled || !uploadImg.assets || uploadImg.assets.length === 0) {
       console.error("Aucune image n'a été sélectionnée.");
       return;
@@ -62,7 +62,6 @@ const Account: FC<Props> = () => {
     let split = assets.uri.split("/");
     let type = split[1].split(";")[0];
 
-    // Change data to blob
     const file = DataURIToBlob(assets.uri);
 
     const formData = new FormData();

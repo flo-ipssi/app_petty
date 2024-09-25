@@ -25,11 +25,6 @@ const Verification: FC<Props> = ({ route }) => {
     const inputRef = useRef<TextInput>(null);
     const params = useGlobalSearchParams();
     const userInfo = Array.isArray(params.userInfo) ? params.userInfo[0] : params.userInfo;
-
-
-    const isValidOTP = otp.every(value => {
-        return value.trim()
-    })
     
     const handleSubmit = async () => {
         // Vérifie si l'OTP est valide (tous les champs OTP doivent être remplis)

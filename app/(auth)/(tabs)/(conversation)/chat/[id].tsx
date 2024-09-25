@@ -57,7 +57,7 @@ const Chat: React.FC = () => {
                 },
                 body: JSON.stringify({
                     messageText: message,
-                    ownerId: user._id,
+                    ownerId: user.id,
                     conversationId: conversationId,
                 }),
             });

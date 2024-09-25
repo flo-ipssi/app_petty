@@ -146,7 +146,7 @@ export default function Apartment() {
 
                     // Is Liked
                     if (direction === 1) {
-                      likeChoice(_id, false, session);
+                      likeChoice(_id, true, session);
                     }
 
                     //Is Disliked

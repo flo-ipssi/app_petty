@@ -58,8 +58,6 @@ const ConversationList: React.FC = () => {
             name: item.petInfo[0].name,
             photo: photo[0] || '',
         };
-
-        console.log(petInfos.photo);
         
         return (
             <ConversationItem
