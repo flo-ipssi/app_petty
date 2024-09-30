@@ -1,7 +1,6 @@
 <resources>
-<<<<<<< HEAD
-    <string name="app_name">expo-router-study</string>
-=======
-    <string name="app_name">petty03</string>
->>>>>>> 4bd91e37b1133038b7fc1119f555d36d68e4d6a3
+  <string name="app_name">petty</string>
+  <string name="expo_splash_screen_resize_mode" translatable="false">contain</string>
+  <string name="expo_splash_screen_status_bar_translucent" translatable="false">false</string>
+  <string name="expo_system_ui_user_interface_style" translatable="false">automatic</string>
 </resources>

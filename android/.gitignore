@@ -10,10 +10,7 @@ build/
 local.properties
 *.iml
 *.hprof
-<<<<<<< HEAD
-=======
 .cxx/
->>>>>>> 4bd91e37b1133038b7fc1119f555d36d68e4d6a3
 
 # Bundle artifacts
 *.jsbundle
