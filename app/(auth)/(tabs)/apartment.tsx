@@ -9,7 +9,7 @@ import AppImagePicker from "@/components/ui/AppImagePicker";
 import CustomModal from "@/components/CustomModal";
 import * as ImagePicker from "expo-image-picker";
 import { UploadData } from "@/@types/upload";
-import { DataURIToBlob } from "@/app/helpers/uploadMedia";
+import { DataURIToBlob, UriToBlob } from "@/app/helpers/uploadMedia";
 
 export default function Apartment() {
   const { session, user } = useSession();
@@ -17,7 +17,7 @@ export default function Apartment() {
   const [modalPhotoVisible, setModalPhotoVisible] = useState(false);
   const [modalDeletePhotoVisible, setModalDeletePhotoVisible] = useState(false);
   const [imageToDelete, setImageToDelete] = useState(null);
-  const [gallery, setGallery] = useState(Array(6).fill(''));
+  const [gallery, setGallery] = useState(Array(6).fill(""));
   const fetchLatestResidence = async (): Promise<UploadData[]> => {
     const res = await fetch(client + `upload/residence`, {
       method: "GET",
@@ -28,7 +28,10 @@ export default function Apartment() {
       },
     });
     const data = await res.json();
-    const filledGallery = [...data?.uploads, ...Array(6 - data?.uploads.length).fill(null)];
+    const filledGallery = [
+      ...data?.uploads,
+      ...Array(6 - data?.uploads.length).fill(null),
+    ];
     setGallery(filledGallery);
 
     return data;
@@ -93,34 +96,29 @@ export default function Apartment() {
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
-    })
-    
+    });
+
     if (!result.canceled) {
       uploadFile(result);
     }
   };
 
   const uploadFile = async (uploadImg: { assets: any[] }) => {
-  
-    const assets = uploadImg.assets[0];
-    let split = assets.uri.split("/");
-    let type = split[1].split(";")[0];
-
-    // Change data to blob
-    const file = DataURIToBlob(assets.uri);
-
-    const formData = new FormData();
-    formData.append("upload", file);
-    formData.append("type", type);
-    formData.append("file", assets.uri);
-
-
     try {
+      const assets = uploadImg.assets[0];
+
+      const formData = new FormData();
+      formData.append("upload", {
+        uri: assets.uri,
+        name: assets.fileName || "upload.jpg",
+        type: assets.mimeType || "image/jpeg",
+      });
       await fetch(client + `upload/create/Residence`, {
         method: "POST",
         body: formData,
         headers: {
           Authorization: "Bearer " + session,
+          "Content-Type": "multipart/form-data",
         },
       }).then(() => {
         fetchLatestResidence();
@@ -129,7 +127,6 @@ export default function Apartment() {
       console.error("Erreur lors de l'upload:", error);
     }
   };
-
 
   const deleteFile = async () => {
     setModalDeletePhotoVisible(false);
@@ -145,7 +142,7 @@ export default function Apartment() {
         }).then(() => {
           fetchLatestResidence();
         });
-      } catch (error) { }
+      } catch (error) {}
     }
   };
 
@@ -161,7 +158,7 @@ export default function Apartment() {
       <View style={styles.divContainer}>
         <Text style={styles.intitule}>Photos</Text>
         <View style={styles.row}>
-          {gallery.map((item: UploadData | null, index) => {
+          {gallery.map((item: any, index) => {
             return (
               <View key={index}>
                 {item ? (
@@ -177,7 +174,9 @@ export default function Apartment() {
                   </View>
                 ) : (
                   <View style={styles.cell}>
-                    <AppImagePicker onClick={() => setModalPhotoVisible(true)} />
+                    <AppImagePicker
+                      onClick={() => setModalPhotoVisible(true)}
+                    />
                   </View>
                 )}
               </View>
@@ -215,7 +214,8 @@ export default function Apartment() {
             value={description}
             placeholderTextColor={colors.OVERLAY}
             placeholder="Décrivez vous en quelques lignes ..."
-          /></View>
+          />
+        </View>
       </View>
     </ScrollView>
   );
@@ -223,7 +223,7 @@ export default function Apartment() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
   },
   divContainer: {
     margin: 10,
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   },
   textArea: {
     borderWidth: 1,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
     borderColor: "#ccc",
     backgroundColor: "#FFF",
     borderRadius: 4,

@@ -105,15 +105,14 @@ export function SessionProvider(props: React.PropsWithChildren) {
   useEffect(() => {
     const loadSession = async () => {
       try {
-        const storedSession = await AsyncStorage.getItem('session'); 
+        const storedSession = await AsyncStorage.getItem('session');
         const storedUser = await AsyncStorage.getItem('user');
 
-        if (storedSession) {
-          setSession(storedSession);
-        }
 
-        if (storedUser) {
+        if (storedSession && storedUser) {
+          setSession(storedSession);
           setUser(JSON.parse(storedUser));
+          await verifySession(storedSession); // Nouvelle vérification de la session
         }
 
         setTimeout(() => {
@@ -129,46 +128,32 @@ export function SessionProvider(props: React.PropsWithChildren) {
   }, []);
 
   // Check the session
-  useEffect(() => {
-    const checkSession = async () => {
-      if (session) {
-        try {
-          const response = await fetch(client + "auth/is-auth", {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session}`,
-            },
-          });
+  const verifySession = async (currentSession: string) => {
+    try {
+      const response = await fetch(client + "auth/is-auth", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${currentSession}`,
+        },
+      });
 
-          if (!response.ok) {
-            signOut(); 
-          } else {
-            const data = await response.json();
-            const userData = data.profile;
-            const token = session;
+      if (response.ok) {
+        const data = await response.json();
+        const userData = data.profile;
 
-            if (token && userData) {
-              await AsyncStorage.setItem('session', token);
-              await AsyncStorage.setItem('user', JSON.stringify(userData));
-              await initSocket();
-            }
-          }
-        } catch (error) {
-          console.error('Error verifying session:', error);
-          signOut();
+        if (userData) {
+          setUser(userData);
+          await AsyncStorage.setItem('user', JSON.stringify(userData));
         }
       } else {
         signOut();
       }
-    };
-
-    checkSession();
-    return () => {
-      // Déconnecter le socket lors du démontage ou de la déconnexion
-      disconnectSocket();
-    };
-  }, [session]);
+    } catch (error) {
+      console.error('Error verifying session:', error);
+      signOut(); // En cas d'erreur, déconnectez l'utilisateur
+    }
+  };
 
   // Filters
   useEffect(() => {
@@ -183,7 +168,10 @@ export function SessionProvider(props: React.PropsWithChildren) {
           });
 
           const data = await response.json();
-          setFiltersData(data.filter);
+          setFiltersData({
+            ...data.filter,
+            location: Array.isArray(data.filter.location) ? data.filter.location : [],
+          });
         } catch (error) {
           console.error('Failed to load filters:', error);
         }
@@ -206,10 +194,10 @@ export function SessionProvider(props: React.PropsWithChildren) {
     } catch (error) {
       console.log(error);
     }
-    
+
     await AsyncStorage.removeItem('session');
     await AsyncStorage.removeItem('user');
-    
+
     setUser(null);
     setSession(null);
   };
@@ -258,3 +246,4 @@ export function SessionProvider(props: React.PropsWithChildren) {
     </AuthContext.Provider>
   );
 }
+

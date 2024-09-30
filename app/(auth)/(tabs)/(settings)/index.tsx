@@ -52,22 +52,21 @@ const Account: FC<Props> = () => {
     }));
   };
 
-  const uploadFile = async (uploadImg : any) => {
+  const uploadFile = async (uploadImg: any) => {
     if (!uploadImg || uploadImg.canceled || !uploadImg.assets || uploadImg.assets.length === 0) {
       console.error("Aucune image n'a été sélectionnée.");
       return;
     }
 
+    
     const assets = uploadImg.assets[0];
-    let split = assets.uri.split("/");
-    let type = split[1].split(";")[0];
-
-    const file = DataURIToBlob(assets.uri);
 
     const formData = new FormData();
-    formData.append("upload", file);
-    formData.append("type", type);
-    formData.append("file", assets.uri);
+    formData.append("upload", {
+      uri: assets.uri,
+      name: assets.fileName || "upload.jpg",
+      type: assets.mimeType || "image/jpeg",
+    });
 
     try {
       const response = await fetch(client + "upload/create/User", {
@@ -106,17 +105,20 @@ const Account: FC<Props> = () => {
   };
 
   const handleCityToggle = (city: string) => {
-    setFiltersData((prevFilters) => {
-      const isSelected = prevFilters.location.includes(city);
-      const updatedLocations = isSelected
-        ? prevFilters.location.filter(selectedCity => selectedCity !== city)
-        : [...prevFilters.location, city];
+    if (filtersData.location) {
 
-      return {
-        ...prevFilters,
-        location: updatedLocations,
-      };
-    });
+      setFiltersData((prevFilters) => {
+        const isSelected = Array.isArray(prevFilters.location) && prevFilters.location.includes(city);
+        const updatedLocations = isSelected
+          ? prevFilters.location.filter(selectedCity => selectedCity !== city)
+          : [...prevFilters.location, city];
+
+        return {
+          ...prevFilters,
+          location: updatedLocations,
+        };
+      });
+    }
   };
 
   const renderTags = (items: string[], selectedItems: string[], onToggle?: (city: string) => void) => {

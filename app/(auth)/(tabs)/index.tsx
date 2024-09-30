@@ -144,13 +144,14 @@ export default function Apartment() {
                       useNativeDriver: true,
                     }).start(removeTopCard);
 
+                    
                     // Is Liked
-                    if (direction === 1) {
+                    if (direction == 1) {
                       likeChoice(_id, true, session);
                     }
 
                     //Is Disliked
-                    if (direction === -1) {
+                    if (direction == -1) {
                       likeChoice(_id, false, session);
                     }
                   } else {

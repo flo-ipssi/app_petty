@@ -1,4 +1,4 @@
-import { Button, Pressable, StyleSheet, TextInput } from "react-native";
+import { Button, Pressable, StyleSheet, TextInput, ActivityIndicator } from "react-native";
 import { Text, View } from "@/components/Themed";
 import { useSession } from "./ctx";
 import { Link, router, useNavigation, useRouter } from "expo-router";
@@ -17,6 +17,7 @@ const signInSchema = yup.object().shape({
   email: yup.string().trim().email().required("Email is required!"),
   password: yup.string().trim().min(8).required("Password is required!"),
 });
+
 interface Props {}
 
 const initialValues = {
@@ -32,18 +33,20 @@ interface SignInUserInfo {
 export default function Login() {
   const { signIn, errorMessage, session } = useSession();
   const [secureEntry, setSecureEntry] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false); // État de chargement
   const router = useRouter();
 
   const togglePassword = () => {
     setSecureEntry(!secureEntry);
   };
 
-  const linkHeading = () => {
-    // navigation.navigate('SignUp')
-  };
-
-  const handleLogin = (values: SignInUserInfo) => {
-    signIn(values.email, values.password);
+  const handleLogin = async (values: SignInUserInfo) => {
+    setIsSubmitting(true); // Active le loader
+    try {
+      await signIn(values.email, values.password);
+    } finally {
+      setIsSubmitting(false); // Désactive le loader après la requête
+    }
   };
 
   useEffect(() => {
@@ -61,7 +64,6 @@ export default function Login() {
       <AuthFormConainer
         heading="Connexion"
         subHeading="Pas encore inscrit ? Inscription"
-        // linkSubHeading={linkHeading}
       >
         <View style={styles.formContainer}>
           <Link href="/SignUp" asChild>
@@ -87,7 +89,13 @@ export default function Login() {
             onRightIconPress={togglePassword}
           />
           {errorMessage && <Text style={{ color: "red" }}>{errorMessage}</Text>}
-          <SubmitBtn title={"Sign in".toLocaleUpperCase()} />
+
+          {/* Afficher un spinner si en cours de chargement */}
+          {isSubmitting ? (
+            <ActivityIndicator size="large" color={colors.PRIMARY} />
+          ) : (
+            <SubmitBtn title={"Sign in".toLocaleUpperCase()} />
+          )}
 
           <View style={styles.linkContainer}>
             <Link href="/LostPassword">
@@ -115,7 +123,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: "center",
   },
-
   separator: {
     marginVertical: 30,
     height: 1,

@@ -23,6 +23,7 @@ export const fetchPets = async (page: number, limit: number, session:string) => 
 
 export async function likeChoice(id: any, choiceSwipe: boolean, session:any) {
     try {
+      
       if (!session) return;
       await fetch(client + "swipe/create", {
         method: "POST",
