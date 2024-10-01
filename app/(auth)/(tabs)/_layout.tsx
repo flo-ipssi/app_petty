@@ -179,20 +179,22 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Ajoute un flou léger
   },
   modalContent: {
-    width: screenWidth * 0.8,
-    height: screenHeight * 0.8,
+    width: "85%",  // Utiliser un pourcentage pour la largeur
+    maxWidth: 400,  // Limiter la taille max pour les grands écrans
+    height: "70%",  // Adapter la hauteur avec un pourcentage
+    maxHeight: 600,  // Limiter la hauteur pour les grands écrans
     padding: 20,
-    // backgroundColor: "rgba(255, 255, 255, 0.9)",
     borderRadius: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.1)", // Couleur d'arrière-plan
     alignItems: "center",
-
+    justifyContent: "space-around", // Espacer les éléments de façon égale
   },
   modalTitle: {
     fontFamily: "Brusher",
-    fontSize: 10,
+    fontSize: screenWidth * 0.08, // Proportionnel à la largeur de l'écran
     color: "white",
     fontWeight: "bold",
     textAlign: "center",
@@ -200,34 +202,88 @@ const styles = StyleSheet.create({
   customButton: {
     borderWidth: 2,
     borderColor: colors.SECONDARY_BORDER,
-    width: "80%",
+    width: "80%",  // Adapter la taille au contenu
     marginVertical: 10,
   },
   customButton2: {
     backgroundColor: colors.SECONDARY_TRANSPARENT,
     borderWidth: 2,
     borderColor: colors.SECONDARY_BORDER,
-    width: "80%",
+    width: "80%",  // Adapter la taille au contenu
   },
   customTitleButton: {
     color: "#FFF",
     fontWeight: "600",
-    fontSize: 5,
+    fontSize: screenWidth * 0.04, // Taille proportionnelle à la largeur de l'écran
   },
   petImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 150,
-    marginVertical: 80,
-    borderWidth:6,
-    borderColor:"white",
+    width: screenWidth * 0.4,  // Adapter l'image à la taille de l'écran
+    height: screenWidth * 0.4,  // Garder une image carrée
+    borderRadius: (screenWidth * 0.4) / 2,  // Pour que l'image soit ronde
+    marginVertical: 20,  // Ajuster l'espacement vertical
+    borderWidth: 6,
+    borderColor: "white",
   },
   matchText: {
-    fontSize: 5,
+    fontSize: screenWidth * 0.05,  // Adapter la taille du texte à l'écran
     color: "white",
     textAlign: "center",
-    marginBottom: 4,
+    marginBottom: 10,
     paddingHorizontal: 10,
   },
+  // modalOverlay: {
+  //   flex: 1,
+  //   justifyContent: "center",
+  //   alignItems: "center",
+  //   backgroundColor: "rgba(0, 0, 0, 0.5)",
+  // },
+  // modalContent: {
+  //   width: screenWidth * 0.8,
+  //   height: screenHeight * 0.8,
+  //   padding: 20,
+  //   // backgroundColor: "rgba(255, 255, 255, 0.9)",
+  //   borderRadius: 10,
+  //   alignItems: "center",
+
+  // },
+  // modalTitle: {
+  //   fontFamily: "Brusher",
+  //   fontSize: 10,
+  //   color: "white",
+  //   fontWeight: "bold",
+  //   textAlign: "center",
+  // },
+  // customButton: {
+  //   borderWidth: 2,
+  //   borderColor: colors.SECONDARY_BORDER,
+  //   width: "80%",
+  //   marginVertical: 10,
+  // },
+  // customButton2: {
+  //   backgroundColor: colors.SECONDARY_TRANSPARENT,
+  //   borderWidth: 2,
+  //   borderColor: colors.SECONDARY_BORDER,
+  //   width: "80%",
+  // },
+  // customTitleButton: {
+  //   color: "#FFF",
+  //   fontWeight: "600",
+  //   fontSize: 5,
+  // },
+  // petImage: {
+  //   width: 60,
+  //   height: 60,
+  //   borderRadius: 150,
+  //   marginVertical: 80,
+  //   borderWidth:6,
+  //   borderColor:"white",
+  // },
+  // matchText: {
+  //   fontSize: 5,
+  //   color: "white",
+  //   textAlign: "center",
+  //   marginBottom: 4,
+  //   paddingHorizontal: 10,
+  // },
 });
 

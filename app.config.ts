@@ -1,12 +1,12 @@
 import { ExpoConfig } from 'expo/config';
 
 const config: ExpoConfig = {
-  name: 'petty',
+  name: 'Petty',
   slug: 'petty',
   version: '1.0.0',
   orientation: 'portrait',
   icon: './assets/images/icon.png',
-  scheme: 'petty',
+  scheme: 'Petty',
   userInterfaceStyle: 'automatic',
   splash: {
     image: './assets/images/splash.png',
@@ -15,6 +15,8 @@ const config: ExpoConfig = {
   },
   assetBundlePatterns: ['**/*'],
   ios: {
+    
+    bundleIdentifier: "com.floipssi.petty",
     supportsTablet: true,
   },
   android: {

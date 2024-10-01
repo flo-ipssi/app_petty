@@ -27,6 +27,8 @@
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="petty"/>
         <data android:scheme="com.floipssi.petty"/>
+        <data android:scheme="Petty"/>
+        <data android:scheme="exp+petty"/>
       </intent-filter>
     </activity>
     <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" android:exported="false"/>
